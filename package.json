@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "src/server.ts",
   "scripts": {
-    "start": "tsc && node --env-file=.env build/server.js"
+    "start": "tsc && node --env-file=.env build/server.js",
+    "lint": "npx eslint ."
   },
   "keywords": [],
   "author": "",
