@@ -1,5 +1,5 @@
 import { IController } from "./IController";
-import { IUser } from "../user";
+import { IUser } from "./IUser";
 
 export interface IEvent {
     id: number;

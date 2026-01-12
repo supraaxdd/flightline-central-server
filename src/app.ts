@@ -1,12 +1,11 @@
 import express from "express";
-import academyRoutes from "./routes/academyRouter"
-
+import userRouter from "./routes/userRouter"
 
 const app = express();
 
 app.use(express.json());
 
 // Routes
-app.use("/api/academy", academyRoutes);
+app.use("/api/users", userRouter);
 
 export default app;

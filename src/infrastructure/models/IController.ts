@@ -1,4 +1,4 @@
-import { IUser } from "../user";
+import { IUser } from "./IUser";
 
 export interface IController {
     user: IUser;
