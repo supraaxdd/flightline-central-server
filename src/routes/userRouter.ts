@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUserById, getUserByDiscordId, getUserByUsername, getUserWithRolesById, getUserWithRolesByDiscordId, getUserWithRolesByUsername, createUser, deleteUserById, deleteUserByDiscordId, deleteUserByUsername } from "../controllers/userController";
+import { getUserById, getUserByDiscordId, getUserByUsername, getUserWithRolesById, getUserWithRolesByDiscordId, getUserWithRolesByUsername, createUser, deleteUserById, deleteUserByDiscordId, deleteUserByUsername } from "../services/userService";
 
 const router = Router();
 

@@ -1,12 +1,9 @@
 import { UserRepository } from "../infrastructure/repositories/UserRepository"
 import { Request, Response } from "express";
 import { IUser } from "../infrastructure/models/IUser";
+import { IdParameter, DiscordIdParameter, UsernameParameter } from "./serviceTypes";
 
 const userRepo: UserRepository = new UserRepository();
-
-type IdParameter = { id: number };
-type DiscordIdParameter = { discordId: string };
-type UsernameParameter = { username: string };
 
 export const getUserById = async (req: Request<IdParameter>, res: Response) => {
 	try {
