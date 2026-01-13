@@ -2,7 +2,7 @@ import { pool } from "../../config/config";
 import { IController } from "../models/IController";
 import { IControllerPosition } from "../models/IControllerPosition";
 import { IControllerRepository } from "./IControllerRepository";
-import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { RowDataPacket } from "mysql2";
 
 export class ControllerRepository implements IControllerRepository {
     public async getControllerById(id: number): Promise<IController | null> {
@@ -127,6 +127,7 @@ export class ControllerRepository implements IControllerRepository {
         }
 
         return controller;
+    
     }
 
     public async getControllerByUsername(username: string): Promise<IController | null> {

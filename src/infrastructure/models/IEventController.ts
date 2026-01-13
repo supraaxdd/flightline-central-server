@@ -1,9 +1,9 @@
 import { IAirport } from "./IAirport";
 import { IControllerPosition } from "./IControllerPosition";
-import { IUser } from "./IUser";
+import { IController } from "./IController";
 
 export interface IEventController {
-    user: IUser;
+    controller: IController;
     airport: IAirport;
     position: IControllerPosition;
 }

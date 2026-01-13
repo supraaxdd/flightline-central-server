@@ -1,8 +1,9 @@
-import { IController } from "./IController";
+import { IEventController } from "./IEventController";
 import { IUser } from "./IUser";
 
 export interface IEvent {
     id: number;
     host: IUser;
-    controllers: IController[];
+    dateHosted: Date;
+    controllers: IEventController[];
 }
