@@ -23,9 +23,9 @@ export class EventRepository implements IEventRepository {
                     WHERE e.host_id = u.id
                     AND e.id = ?
                 ) AS host_discord_id,
-                u.id AS user_id,
-                u.discord_id,
-                u.username,
+                u.id AS controller_user_id,
+                u.discord_id AS controller_discord_id,
+                u.username AS controller_username,
                 cp.controller_since,
                 (
                     SELECT p.id
@@ -104,6 +104,8 @@ export class EventRepository implements IEventRepository {
 
             event.controllers!.push(eventController);
         }
+
+        // TODO: ADD ROLES TO ALL USERS PRESENT
 
         return event;
     }
