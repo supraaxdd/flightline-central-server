@@ -3,10 +3,11 @@ import { pool } from "../../config/config";
 import { IEvent } from "../models/IEvent";
 import { IEventRepository } from "./IEventRepository";
 import { IEventController } from "../models/IEventController";
+import { IRole } from "../models/IRole";
 
 export class EventRepository implements IEventRepository {
     public async getEventById(id: number): Promise<IEvent | null> {
-        const sql = `
+        let sql = `
             SELECT 
                 e.id AS event_id,
                 e.date_hosted,
@@ -61,7 +62,7 @@ export class EventRepository implements IEventRepository {
 
         if (rows.length === 0) return null;
 
-        let eventData = rows[0];
+        const eventData = rows[0];
 
         if (eventData === undefined) return null;
 
@@ -102,10 +103,34 @@ export class EventRepository implements IEventRepository {
                 }
             }
 
-            event.controllers!.push(eventController);
-        }
+            sql = `
+                SELECT r.id, r.name
+                FROM role r, user u, userrole ur
+                WHERE ur.user_id = u.id
+                AND ur.role_id = r.id
+                AND u.id = ?;
+            `;
 
-        // TODO: ADD ROLES TO ALL USERS PRESENT
+            const [userRolesRows] = await pool.execute<RowDataPacket[]>(
+                sql,
+                [row.controller_user_id]
+            );
+
+            if (userRolesRows.length === 0)
+                event.controllers!.push(eventController);
+            else {
+                for (const roleRow of userRolesRows) {
+                    const role: IRole = {
+                        id: roleRow.id,
+                        name: roleRow.name
+                    }
+
+                    eventController.controller.user.roles!.push(role);
+                }
+
+                event.controllers!.push(eventController);
+            }
+        }
 
         return event;
     }
