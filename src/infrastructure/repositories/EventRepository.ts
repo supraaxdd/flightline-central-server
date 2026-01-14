@@ -4,6 +4,7 @@ import { IEvent } from "../models/IEvent";
 import { IEventRepository } from "./IEventRepository";
 import { IEventController } from "../models/IEventController";
 import { IRole } from "../models/IRole";
+import { IEventSummaryDto } from "../dtos/IEventSummaryDto";
 
 export class EventRepository implements IEventRepository {
     public async getEventById(id: number): Promise<IEvent | null> {
@@ -135,15 +136,101 @@ export class EventRepository implements IEventRepository {
         return event;
     }
 
-    getEventsHostedByUserById(userId: number): Promise<IEvent[] | null> {
-        throw new Error("Method not implemented.");
+    public async getEventsHostedByUserById(userId: number): Promise<IEventSummaryDto[] | null> {
+        const sql = `
+            SELECT
+                e.id,
+                e.date_hosted,
+                COUNT(eca.user_id) AS controller_count
+            FROM event e
+            LEFT JOIN eventcontrollerattendee eca ON eca.event_id = e.id
+            WHERE e.host_id = ?
+            GROUP BY e.id;
+        `;
+
+        const [rows] = await pool.execute<RowDataPacket[]>(
+            sql,
+            [userId]
+        );
+
+        if (rows.length === 0) return null;
+
+        const events: IEventSummaryDto[] = [];
+
+        for (const row of rows) {
+            events.push({
+                id: row.id,
+                dateHosted: row.date_hosted,
+                controllerCount: row.controller_count
+            });
+        }
+
+        return events;
     }
 
-    getEventsHostedByUserByDiscordId(discordId: string): Promise<IEvent[] | null> {
-        throw new Error("Method not implemented.");
+    public async getEventsHostedByUserByDiscordId(discordId: string): Promise<IEventSummaryDto[] | null> {
+        const sql = `
+            SELECT
+                e.id,
+                e.date_hosted,
+                COUNT(eca.user_id) AS controller_count
+            FROM event e
+            LEFT JOIN eventcontrollerattendee eca ON eca.event_id = e.id
+            JOIN user u ON e.host_id = u.id
+            WHERE u.discord_id = ?
+            GROUP BY e.id;
+        `;
+
+        const [rows] = await pool.execute<RowDataPacket[]>(
+            sql,
+            [discordId]
+        );
+
+        if (rows.length === 0) return null;
+
+        const events: IEventSummaryDto[] = [];
+
+        for (const row of rows) {
+            events.push({
+                id: row.id,
+                dateHosted: row.date_hosted,
+                controllerCount: row.controller_count
+            });
+        }
+
+        return events;
     }
 
-    getEventsHostedByUserByUsername(username: string): Promise<IEvent[] | null> {
-        throw new Error("Method not implemented.");
+    public async getEventsHostedByUserByUsername(username: string): Promise<IEventSummaryDto[] | null> {
+        const sql = `
+            SELECT
+                e.id,
+                e.date_hosted,
+                COUNT(eca.user_id) AS controller_count
+            FROM event e
+            LEFT JOIN eventcontrollerattendee eca ON eca.event_id = e.id
+            JOIN user u ON e.host_id = u.id
+            WHERE u.username = ?
+            GROUP BY e.id;
+        `;
+
+        const [rows] = await pool.execute<RowDataPacket[]>(
+            sql,
+            [username]
+        );
+
+        if (rows.length === 0) return null;
+
+        const events: IEventSummaryDto[] = [];
+
+        for (const row of rows) {
+            events.push({
+                id: row.id,
+                dateHosted: row.date_hosted,
+                controllerCount: row.controller_count
+            });
+        }
+
+        return events;
     }
 }
