@@ -4,7 +4,7 @@ import { pool } from "../../config/config";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 export class UserRepository implements IUserRepository {
-    public async getUserById(id: number): Promise<IUser | null> {
+    public async getById(id: number): Promise<IUser | null> {
         const sql = `
             SELECT * FROM user
             WHERE id = ?
@@ -21,7 +21,7 @@ export class UserRepository implements IUserRepository {
         return rows[0] as IUser;
     };
 
-    public async getUserByDiscordId(discordId: string): Promise<IUser | null> {
+    public async getByDiscordId(discordId: string): Promise<IUser | null> {
         const sql = `
             SELECT * FROM user
             WHERE discord_id = ?
@@ -38,7 +38,7 @@ export class UserRepository implements IUserRepository {
         return rows[0] as IUser;
     }
 
-    public async getUserByUsername(username: string): Promise<IUser | null> {
+    public async getByUsername(username: string): Promise<IUser | null> {
         const sql = `
             SELECT * FROM user
             WHERE username = ?
@@ -55,7 +55,7 @@ export class UserRepository implements IUserRepository {
         return rows[0] as IUser;
     }
 
-    public async getUserWithRolesById(id: number): Promise<IUser | null> {
+    public async getWithRolesById(id: number): Promise<IUser | null> {
         const sql = `
             SELECT u.id, u.discord_id, u.username, r.id AS role_id, r.name AS role_name
             FROM user u
@@ -94,7 +94,7 @@ export class UserRepository implements IUserRepository {
         return user;
     }
 
-    public async getUserWithRolesByDiscordId(discordId: string): Promise<IUser | null> {
+    public async getWithRolesByDiscordId(discordId: string): Promise<IUser | null> {
         const sql = `
             SELECT u.id, u.discord_id, u.username, r.id AS role_id, r.name AS role_name
             FROM user u
@@ -133,7 +133,7 @@ export class UserRepository implements IUserRepository {
         return user;
     }
 
-    public async getUserWithRolesByUsername(username: string): Promise<IUser | null> {
+    public async getWithRolesByUsername(username: string): Promise<IUser | null> {
         const sql = `
             SELECT u.id, u.discord_id, u.username, r.id AS role_id, r.name AS role_name
             FROM user u
@@ -172,7 +172,7 @@ export class UserRepository implements IUserRepository {
         return user;
     }
 
-    public async createUser(discordId: string, username: string): Promise<boolean> {
+    public async create(discordId: string, username: string): Promise<boolean> {
         const sql = `
             INSERT INTO user (discord_id, username)
             VALUES (?, ?)
@@ -188,7 +188,7 @@ export class UserRepository implements IUserRepository {
         return true;
     }
 
-    public async deleteUserById(id: number): Promise<boolean> {
+    public async deleteById(id: number): Promise<boolean> {
         const sql = `
             DELETE FROM user
             WHERE id = ?
@@ -204,7 +204,7 @@ export class UserRepository implements IUserRepository {
         return true;
     }
 
-    public async deleteUserByDiscordId(discordId: string): Promise<boolean> {
+    public async deleteByDiscordId(discordId: string): Promise<boolean> {
         const sql = `
             DELETE FROM user
             WHERE discord_id = ?
@@ -220,7 +220,7 @@ export class UserRepository implements IUserRepository {
         return true;
     }
 
-    public async deleteUserByUsername(username: string): Promise<boolean> {
+    public async deleteByUsername(username: string): Promise<boolean> {
         const sql = `
             DELETE FROM user
             WHERE username = ?
