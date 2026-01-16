@@ -68,8 +68,7 @@ export class ControllerRepository implements IControllerRepository {
         return controller;
     }
     
-    public async create(user: IUser | number): Promise<boolean> {
-        const userId = (typeof user === "number") ? user : user.id; 
+    public async create(id: number): Promise<boolean> {
         const controller_since = new Date();
 
         const sql = `
@@ -79,7 +78,7 @@ export class ControllerRepository implements IControllerRepository {
 
         const [result] = await pool.execute<ResultSetHeader>(
             sql,
-            [userId, controller_since]
+            [id, controller_since]
         )
 
         if (result.affectedRows > 0) return true;

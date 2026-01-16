@@ -1,6 +1,6 @@
 import { EventRepository } from "../infrastructure/repositories/EventRepository";
 import { Request, Response } from "express";
-import { IdParameter, DiscordIdParameter, UsernameParameter } from "./serviceTypes";
+import { IdParameter, DiscordIdParameter, UsernameParameter } from "../controllers/RequestTypes";
 import { IEvent } from "../infrastructure/models/IEvent";
 import { IEventSummaryDto } from "../infrastructure/dtos/IEventSummaryDto";
 
