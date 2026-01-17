@@ -3,28 +3,30 @@ import { UserRepository } from "../infrastructure/repositories/UserRepository"
 export class UserService {
 	private userRepo: UserRepository = new UserRepository()
 
-	getUserById = async (id: number) => {
-		return await this.userRepo.getById(id);
-	}
+	getUserById = async (id: number) => await this.userRepo.getById(id);
 	
-	getUserByDiscordId = async (discordId: string) => {
-		return await this.userRepo.getByDiscordId(discordId);
-	}
+	getUserByDiscordId = async (discordId: string) => await this.userRepo.getByDiscordId(discordId);
 	
-	getUserByUsername = async (username: string) => {
-		return await this.userRepo.getByUsername(username);
-	}
+	getUserByUsername = async (username: string) => await this.userRepo.getByUsername(username);
 	
-	getRoles = async (id: number) => {
-		return await this.userRepo.getRoles(id);
-	}
+	getRoles = async (id: number) => await this.userRepo.getRoles(id);
+
+	existsById = async (id: number) => await this.userRepo.existsById(id);
 	
-	createUser = async (discordId: string, username: string) => {
-		return await this.userRepo.create(discordId, username);
-		// TODO: ADD LOGIC (ANOTHER REPO FUNCTION) TO CHECK IF USER EXISTS
-	}
+	existsByDiscordId = async (discordId: string) => await this.userRepo.existsByDiscordId(discordId);
 	
 	deleteUser = async (id: number) => {
+		const exists = this.existsById(id);
+		if (!exists) return true;
+
 		return await this.userRepo.delete(id);
 	}
+
+	createUser = async (discordId: string, username: string) => {
+		const exists = this.existsByDiscordId(discordId);
+		if (!exists) return false;
+
+		return await this.userRepo.create(discordId, username);
+	}
+	
 }

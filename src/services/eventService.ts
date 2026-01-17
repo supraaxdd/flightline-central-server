@@ -29,27 +29,3 @@ export const getEventsHostedByUserById = async (req: Request<IdParameter>, res: 
         res.status(500).json(e);
     }
 }
-
-export const getEventsHostedByUserByDiscordId = async (req: Request<DiscordIdParameter>, res: Response) => {
-    try {
-        const { discordId } = req.params;
-
-        const events: IEventSummaryDto[] | null = await eventRepo.getEventsHostedByUserByDiscordId(discordId);
-        res.status(200).json(events);
-    } catch (e) {
-        console.error(e);
-        res.status(500).json(e);
-    }
-}
-
-export const getEventsHostedByUserByUsername = async (req: Request<UsernameParameter>, res: Response) => {
-    try {
-        const { username } = req.params;
-
-        const events: IEventSummaryDto[] | null = await eventRepo.getEventsHostedByUserByUsername(username);
-        res.status(200).json(events); 
-    } catch (e) {
-        console.error(e);
-        res.status(500).json(e);
-    }
-}

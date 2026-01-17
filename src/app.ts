@@ -1,7 +1,7 @@
 import express from "express";
-import userRouter from "./routes/userRouter"
-import controllerRouter from "./routes/controllerRouter";
-import eventRouter from "./routes/eventRouter";
+import userRouter from "./routes/UserRouter"
+import controllerRouter from "./routes/ControllerRouter";
+import eventRouter from "./routes/EventRouter";
 
 const app = express();
 

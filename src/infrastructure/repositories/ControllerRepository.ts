@@ -1,21 +1,21 @@
 import { pool } from "../../config/config";
 import { IController } from "../models/IController";
-import { IControllerPosition } from "../models/IControllerPosition";
-import { IUser } from "../models/IUser";
 import { IControllerRepository } from "./IControllerRepository";
-import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { RowDataPacket } from "mysql2";
 
 export class ControllerRepository implements IControllerRepository {
+    private CONTROLLER_ROLE_ID = 2;
+
     public async getByUserId(id: number): Promise<IController | null> {
         let sql = `
-        SELECT u.id, u.discord_id, u.username, cpo.id AS position_id, cpo.name AS position, cp.controller_since
-        FROM user u, controllerposition cpo, controllerprofile cp, controllerqualification cq
-        WHERE cq.user_id = u.id
-        AND cq.position_id = cpo.id
-        AND cp.user_id = u.id
-        AND u.id = ?
+            SELECT u.id, u.discord_id, u.username, cpo.id AS position_id, cpo.name AS position, cp.controller_since
+            FROM user u, controllerposition cpo, controllerprofile cp, controllerqualification cq
+            WHERE cq.user_id = u.id
+            AND cq.position_id = cpo.id
+            AND cp.user_id = u.id
+            AND u.id = ?
         `;
-        
+
         const [rows] = await pool.execute<RowDataPacket[]>(
             sql,
             [id]
@@ -26,7 +26,7 @@ export class ControllerRepository implements IControllerRepository {
         const controllerData = rows[0];
 
         if (controllerData === undefined) return null;
-        
+
         const controller: IController = {
             user: {
                 id: controllerData.id,
@@ -48,7 +48,7 @@ export class ControllerRepository implements IControllerRepository {
             RIGHT JOIN user u ON ur.user_id = u.id
             WHERE u.id = ?;
         `;
-        
+
         const [roleRows] = await pool.execute<RowDataPacket[]>(
             sql,
             [id]
@@ -67,37 +67,95 @@ export class ControllerRepository implements IControllerRepository {
 
         return controller;
     }
-    
-    public async create(id: number): Promise<boolean> {
-        const controller_since = new Date();
 
-        const sql = `
-            INSERT INTO controllerprofile (user_id, controller_since)
-            VALUES (?, ?) 
-        `;
+    public async create(
+        userId: number,
+        controllerSince: Date
+    ): Promise<boolean> {
+        const conn = await pool.getConnection();
 
-        const [result] = await pool.execute<ResultSetHeader>(
-            sql,
-            [id, controller_since]
-        )
+        try {
+            await conn.beginTransaction();
 
-        if (result.affectedRows > 0) return true;
-        else return false;
+            // 1. controllerprofile
+            await conn.execute(
+                `
+                    INSERT INTO controllerprofile (user_id, controller_since)
+                    VALUES (?, ?)
+                `,
+                [userId, controllerSince]
+            );
+
+            // 2. controllerqualification
+            await conn.execute(
+                `
+                    INSERT INTO controllerqualification (user_id, position_id)
+                    VALUES (?, ?)
+                `,
+                [userId, 1]
+            );
+
+            // 3. userrole (Controller role)
+            await conn.execute(
+                `
+                    INSERT INTO userrole (user_id, role_id)
+                    VALUES (?, ?)
+                `,
+                [userId, this.CONTROLLER_ROLE_ID]
+            );
+
+            await conn.commit();
+            return true;
+        } catch (err) {
+            await conn.rollback();
+            throw err;
+        } finally {
+            conn.release();
+        }
     }
 
     public async delete(id: number): Promise<boolean> {
-        const sql = `
-            DELETE FROM controllerprofile
-            WHERE id = ?
-        `;
+        const conn = await pool.getConnection();
 
-        const [result] = await pool.execute<ResultSetHeader>(
-            sql,
-            [id]
-        );
+        try {
+            await conn.beginTransaction();
 
-        if (result.affectedRows > 0) return true;
-        else return false;
+            // 1. controllerprofile
+            await conn.execute(
+                `
+                    DELETE FROM controllerprofile
+                    WHERE user_id = ?
+                `,
+                [id]
+            );
+
+            // 2. controllerqualification
+            await conn.execute(
+                `
+                    DELETE FROM controllerqualification
+                    WHERE user_id = ?
+                `,
+                [id]
+            );
+
+            // 3. userrole (Controller role)
+            await conn.execute(
+                `
+                    DELETE FROM userrole
+                    WHERE user_id = ?
+                    AND role_id = ?
+                `,
+                [id, this.CONTROLLER_ROLE_ID]
+            );
+
+            await conn.commit();
+            return true;
+        } catch (err) {
+            await conn.rollback();
+            throw err;
+        } finally {
+            conn.release();
+        }
     }
 
     public async update(id: number): Promise<boolean> {

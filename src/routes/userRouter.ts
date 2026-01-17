@@ -7,7 +7,7 @@ router.get('/getById/:id', getUserById);
 router.get('/getByDiscordId/:discordId', getUserByDiscordId);
 router.get('/getByUsername/:username', getUserByUsername);
 router.get('/getRoles/:id', getRoles);
-router.post('/create/:discordId/:username', createUser);
-router.delete('/delete/:id', deleteUser);
+router.post('/:discordId/:username', createUser);
+router.delete('/:id', deleteUser);
 
 export default router;

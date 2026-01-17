@@ -1,13 +1,11 @@
 import { Router } from "express";
-import { getControllerByDiscordId, getControllerById, getControllerByUsername, getControllerQualificationByDiscordId, getControllerQualificationById, getControllerQualificationByUsername } from "../services/controllerService";
+import { createController, deleteController, getControllerById, updateController } from "../controllers/ControllerHttpController";
 
 const router = Router();
 
-router.get('/getById/:id', getControllerById);
-router.get('/getByDiscordId/:discordId', getControllerByDiscordId);
-router.get('/getByUsername/:username', getControllerByUsername);
-router.get('/getQualificationById/:id', getControllerQualificationById);
-router.get('/getQualificationByDiscordId/:discordId', getControllerQualificationByDiscordId);
-router.get('/getQualificationByUsername/:username', getControllerQualificationByUsername);
+router.get('/:id', getControllerById);
+router.post('/:id', createController);
+router.delete('/:id', deleteController);
+router.put('/:id', updateController);
 
 export default router;
