@@ -1,17 +1,13 @@
 import { Router } from "express";
-import { getUserById, getUserByDiscordId, getUserByUsername, getUserWithRolesById, getUserWithRolesByDiscordId, getUserWithRolesByUsername, createUser, deleteUserById, deleteUserByDiscordId, deleteUserByUsername } from "../services/UserService";
+import { getUserById, getUserByDiscordId, getUserByUsername, createUser, deleteUser, getRoles } from "../controllers/UserHttpController";
 
 const router = Router();
 
 router.get('/getById/:id', getUserById);
 router.get('/getByDiscordId/:discordId', getUserByDiscordId);
 router.get('/getByUsername/:username', getUserByUsername);
-router.get('/getWithRolesById/:id', getUserWithRolesById);
-router.get('/getWithRolesByDiscordId/:discordId', getUserWithRolesByDiscordId);
-router.get('/getWithRolesByUsername/:username', getUserWithRolesByUsername);
-router.post('/createUser/:id/:username', createUser);
-router.delete('/deleteById/:id', deleteUserById);
-router.delete('/deleteById/:discordId', deleteUserByDiscordId);
-router.delete('/deleteById/:username', deleteUserByUsername);
+router.get('/getRoles/:id', getRoles);
+router.post('/create/:discordId/:username', createUser);
+router.delete('/delete/:id', deleteUser);
 
 export default router;

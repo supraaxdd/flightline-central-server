@@ -90,6 +90,32 @@ export class UserRepository implements IUserRepository {
         return userRoles;
     }
 
+    public async existsById(id: number): Promise<boolean> {
+        const sql = `
+            SELECT 1 FROM user WHERE id = ?
+        `;
+
+        const [row] = await pool.execute<RowDataPacket[]>(
+            sql,
+            [id]
+        );
+
+        return row.length > 0;
+    }
+
+    public async existsByDiscordId(discordId: string): Promise<boolean> {
+        const sql = `
+            SELECT 1 FROM user WHERE discord_id = ?
+        `;
+
+        const [row] = await pool.execute<RowDataPacket[]>(
+            sql,
+            [discordId]
+        );
+
+        return row.length > 0;
+    }
+
     public async create(discordId: string, username: string): Promise<boolean> {
         const sql = `
             INSERT INTO user (discord_id, username)

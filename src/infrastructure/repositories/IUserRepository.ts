@@ -6,6 +6,8 @@ export interface IUserRepository {
     getByDiscordId(discordId: string): Promise<IUser | null>;
     getByUsername(username: string): Promise<IUser | null>;
     getRoles(id: number): Promise<IRole[] | null>;
+    existsById(id: number): Promise<boolean>;
+    existsByDiscordId(discordId: string): Promise<boolean>;
     create(discordId: string, username: string): Promise<boolean>;
     delete(id: number): Promise<boolean>;
 }
