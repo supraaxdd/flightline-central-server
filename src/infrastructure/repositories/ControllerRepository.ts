@@ -1,7 +1,9 @@
+import { PoolConnection } from "mysql2/promise";
 import { pool } from "../../config/config";
+import { IControllerUpdateDto } from "../dtos/IControllerUpdateDto";
 import { IController } from "../models/IController";
 import { IControllerRepository } from "./IControllerRepository";
-import { RowDataPacket } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 export class ControllerRepository implements IControllerRepository {
     private CONTROLLER_ROLE_ID = 2;
@@ -158,8 +160,68 @@ export class ControllerRepository implements IControllerRepository {
         }
     }
 
-    public async update(id: number): Promise<boolean> {
-        throw new Error("Method not implemented yet.");
+    public async update(userId: number, controllerChange: IControllerUpdateDto): Promise<boolean> {
+        const fields = [];
+        const values = [];
+
+        if (
+            controllerChange.controllerSince === undefined &&
+            controllerChange.qualificationPositionId === undefined
+        ) return false;
+
+        const conn = await pool.getConnection();
+
+        try {
+            await conn.beginTransaction();
+
+            let updated = false;
+
+            if (controllerChange.controllerSince !== undefined) {
+                fields.push('controller_since = ?');
+                values.push(controllerChange.controllerSince);
+            }
+
+            if (controllerChange.qualificationPositionId !== undefined) {
+                const ok = await this.updateQualification(conn, userId, controllerChange.qualificationPositionId);
+                if (!ok) throw new Error('Qualification update failed');
+                updated = true;
+            }
+
+            if (fields.length > 0) {
+                const sql = `
+                    UPDATE controllerprofile
+                    SET ${fields.join(', ')}
+                    WHERE user_id = ?
+                `;
+                values.push(userId);
+
+                const [result] = await conn.execute<ResultSetHeader>(sql, values);
+                if (result.affectedRows > 0) updated = true;
+            }
+
+            await conn.commit();
+            return updated;
+        } catch (e) {
+            await conn.rollback();
+            throw e;
+        } finally {
+            conn.release();
+        }
+    }
+
+    private async updateQualification(conn: PoolConnection, userId: number, positionId: number): Promise<boolean> {
+        const sql = `
+            UPDATE controllerqualification
+            SET position_id = ?
+            WHERE user_id = ?
+        `;
+
+        const [result] = await conn.execute<ResultSetHeader>(
+            sql,
+            [positionId, userId]
+        );
+
+        return result.affectedRows > 0;
     }
 
 }

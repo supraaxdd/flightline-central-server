@@ -1,3 +1,4 @@
+import { IControllerUpdateDto } from "../infrastructure/dtos/IControllerUpdateDto";
 import { ControllerRepository } from "../infrastructure/repositories/ControllerRepository";
 
 export class ControllerService {
@@ -9,6 +10,9 @@ export class ControllerService {
 
     deleteController = async (id: number) => await this.controllerRepo.delete(id);
 
-    updateController = async (id: number) => await this.controllerRepo.update(id);
+    updateController = async (
+        id: number,
+        controllerChange: IControllerUpdateDto
+    ) => await this.controllerRepo.update(id, controllerChange);
 }
 
