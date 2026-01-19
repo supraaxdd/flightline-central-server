@@ -1,4 +1,4 @@
-import { RowDataPacket } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { pool } from "../../config/config";
 import { IEvent } from "../models/IEvent";
 import { IEventRepository } from "./IEventRepository";
@@ -166,5 +166,23 @@ export class EventRepository implements IEventRepository {
         }
 
         return events;
+    }
+
+    public async create(userId: number, dateHosted: Date): Promise<boolean> {
+        const sql = `
+            INSERT INTO event (host_id, date_hosted)
+            VALUES (?, ?)
+        `;
+
+        const [result] = await pool.execute<ResultSetHeader>(
+            sql,
+            [userId, dateHosted]
+        );
+
+        return result.affectedRows > 0;
+    }
+
+    public async update(id: number): Promise<boolean> {
+        throw new Error("Method not implemented yet.");
     }
 }

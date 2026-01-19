@@ -3,7 +3,7 @@ import { getEventById, getEventsHostedByUserById } from "../services/EventServic
 
 const router = Router();
 
-router.get('/getById/:id', getEventById);
+router.get('/:id', getEventById);
 router.get('/getEventsHostedByUserById/:id', getEventsHostedByUserById);
 
 export default router;
