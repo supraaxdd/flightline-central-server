@@ -5,6 +5,8 @@ import { IEventRepository } from "./IEventRepository";
 import { IEventController } from "../models/IEventController";
 import { IRole } from "../models/IRole";
 import { IEventSummaryDto } from "../dtos/IEventSummaryDto";
+import { IEventUpdateDto } from "../dtos/IEventUpdateDto";
+import { IEventControllerAttendeeUpdateDto } from "../dtos/IEventControllerAttendeeUpdateDto";
 
 export class EventRepository implements IEventRepository {
     public async getEventById(id: number): Promise<IEvent | null> {
@@ -183,6 +185,6 @@ export class EventRepository implements IEventRepository {
     }
 
     public async update(id: number): Promise<boolean> {
-        throw new Error("Method not implemented yet.");
+        return true;
     }
 }

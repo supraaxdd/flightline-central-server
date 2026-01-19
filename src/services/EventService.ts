@@ -1,31 +1,36 @@
+import { IEventUpdateDto } from "../infrastructure/dtos/IEventUpdateDto";
+import { IEventControllerAttendeeUpdateDto } from "../infrastructure/dtos/IEventControllerAttendeeUpdateDto";
 import { EventRepository } from "../infrastructure/repositories/EventRepository";
-import { Request, Response } from "express";
-import { IdParameter, DiscordIdParameter, UsernameParameter } from "../controllers/RequestTypes";
-import { IEvent } from "../infrastructure/models/IEvent";
-import { IEventSummaryDto } from "../infrastructure/dtos/IEventSummaryDto";
 
-const eventRepo: EventRepository = new EventRepository();
+export class EventService {
+    private eventRepo: EventRepository = new EventRepository();
 
-export const getEventById = async (req: Request<IdParameter>, res: Response) => {
-    try {
-        const { id } = req.params;
+    getEventById = async (id: number) => await this.eventRepo.getEventById(id);
 
-        const event: IEvent | null = await eventRepo.getEventById(id);
-        res.status(200).json(event);
-    } catch (e) {
-        console.error(e);
-        res.status(500).json(e);
-    }
-}
+    getEventsHostedByUserById = async (userId: number) => await this.eventRepo.getEventsHostedByUserById(userId);
 
-export const getEventsHostedByUserById = async (req: Request<IdParameter>, res: Response) => {
-    try {
-        const { id } = req.params;
+    createEvent = async (hostId: number, dateHosted: Date) => await this.eventRepo.create(hostId, dateHosted);
 
-        const events: IEventSummaryDto[] | null = await eventRepo.getEventsHostedByUserById(id);
-        res.status(200).json(events);
-    } catch (e) {
-        console.error(e);
-        res.status(500).json(e);
-    }
+    updateEvent = async (
+        eventId: number,
+        update: IEventUpdateDto
+    ) => {
+        if (Object.keys(update).length === 0) {
+            throw new Error("No event fields provided for update");
+        }
+
+        // return this.eventRepo.update(eventId, update);
+    };
+
+    updateEventAttendee = async (
+        eventId: number,
+        userId: number,
+        update: IEventControllerAttendeeUpdateDto
+    ) => {
+        if (Object.keys(update).length === 0) {
+            throw new Error("No attendee fields provided for update");
+        }
+
+        // return this.eventRepo.updateAttendee(eventId, userId, update);
+    };
 }
