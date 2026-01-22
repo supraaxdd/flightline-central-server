@@ -11,7 +11,7 @@ interface Config {
 const config: Config = {
     port: Number(process.env.PORT) || 3000,
     host: process.env.HOST ?? "",
-    user: process.env.USER ?? "",
+    user: process.env.DB_USER ?? "",
     password: process.env.PASSWORD ?? "",
     database: process.env.DATABASE ?? ""
 };
