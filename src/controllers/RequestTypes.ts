@@ -7,6 +7,11 @@ export type UserDataParameter = {
     username: string;
 }
 
+export type UserUpdateParameter = {
+    discordId?: string;
+    username?: string;
+}
+
 export type ControllerProfileUpdateParameter = {
     controllerSince?: Date;
     qualificationPositionId?: number;

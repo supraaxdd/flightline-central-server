@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { IdParameter, DiscordIdParameter, UsernameParameter, UserDataParameter } from "./RequestTypes";
+import { IdParameter, DiscordIdParameter, UsernameParameter, UserDataParameter, UserUpdateParameter } from "./RequestTypes";
 import { UserService } from "../services/UserService";
+import { IUserUpdateDto } from "../infrastructure/dtos/IUserUpdateDto";
 
 const userService: UserService = new UserService();
 
@@ -68,4 +69,27 @@ export const createUser = async (req: Request<UserDataParameter>, res: Response)
         console.error(e);
         res.status(500).json(e);
     } 
+}
+
+export const updateUser = async (req: Request<IdParameter, object, UserUpdateParameter>, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { discordId, username } = req.body;
+
+        const updateDto: IUserUpdateDto = {};
+
+        if (discordId !== undefined) {
+            updateDto.discordId = discordId;
+        }
+
+        if (username !== undefined) {
+            updateDto.username = username;
+        }
+
+        const success = await userService.updateUser(id, updateDto);
+        res.status(200).json(success);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json(e);
+    }
 }

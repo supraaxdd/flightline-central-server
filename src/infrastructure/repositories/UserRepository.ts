@@ -3,6 +3,7 @@ import { IUserRepository } from "./IUserRepository";
 import { pool } from "../../config/config";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { IRole } from "../models/IRole";
+import { IUserUpdateDto } from "../dtos/IUserUpdateDto";
 
 export class UserRepository implements IUserRepository {
     public async getById(id: number): Promise<IUser | null> {
@@ -130,6 +131,55 @@ export class UserRepository implements IUserRepository {
         if (rows.affectedRows === 0) return false;
 
         return true;
+    }
+
+    public async update(id: number, change: IUserUpdateDto): Promise<boolean> {
+        const fields = [];
+        const values = [];
+
+        if (
+            change.discordId === undefined &&
+            change.username === undefined
+        ) return false;
+
+        const conn = await pool.getConnection();
+
+        try {
+            await conn.beginTransaction();
+
+            let updated = false;
+
+            if (change.discordId !== undefined) {
+                fields.push('discord_id = ?');
+                values.push(change.discordId);
+            }
+
+            if (change.username !== undefined) {
+                fields.push('username = ?');
+                values.push(change.username);
+            }
+
+            if (fields.length > 0) {
+                const sql = `
+                    UPDATE user
+                    SET ${fields.join(', ')}
+                    WHERE id = ?
+                `;
+
+                values.push(id);
+
+                const [result] = await conn.execute<ResultSetHeader>(sql, values);
+                if (result.affectedRows > 0) updated = true;
+            }
+
+            await conn.commit();
+            return updated;
+        } catch (e) {
+            await conn.rollback();
+            throw e;
+        } finally {
+            conn.release();
+        }
     }
 
     public async delete(id: number): Promise<boolean> {

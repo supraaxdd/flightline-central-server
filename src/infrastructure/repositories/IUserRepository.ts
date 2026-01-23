@@ -1,3 +1,4 @@
+import { IUserUpdateDto } from "../dtos/IUserUpdateDto";
 import { IRole } from "../models/IRole";
 import { IUser } from "../models/IUser";
 
@@ -9,5 +10,6 @@ export interface IUserRepository {
     existsById(id: number): Promise<boolean>;
     existsByDiscordId(discordId: string): Promise<boolean>;
     create(discordId: string, username: string): Promise<boolean>;
+    update(id: number, change: IUserUpdateDto): Promise<boolean>;
     delete(id: number): Promise<boolean>;
 }

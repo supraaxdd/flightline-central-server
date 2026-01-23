@@ -1,3 +1,4 @@
+import { IUserUpdateDto } from "../infrastructure/dtos/IUserUpdateDto";
 import { UserRepository } from "../infrastructure/repositories/UserRepository"
 
 export class UserService {
@@ -28,5 +29,9 @@ export class UserService {
 
 		return await this.userRepo.create(discordId, username);
 	}
-	
+
+	updateUser = async (
+		id: number,
+		change: IUserUpdateDto
+	) => await this.userRepo.update(id, change);
 }
