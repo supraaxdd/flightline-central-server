@@ -1,7 +1,8 @@
 import { IEventController } from "../models/IEventController";
 import { IEventControllerAttendeeRepository } from "./IEventControllerAttendeeRepository";
 import { pool } from "../../config/config"
-import { RowDataPacket } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { IEventControllerAttendeeUpdateDto } from "../dtos/IEventControllerAttendeeUpdateDto";
 
 export class EventControllerAttendeeRepository implements IEventControllerAttendeeRepository {
     public async getController(eventId: number, userId: number): Promise<IEventController | null> {
@@ -73,7 +74,83 @@ export class EventControllerAttendeeRepository implements IEventControllerAttend
         return eventController;
     }
 
-    public async updateControllerAssignment(eventId: number, userId: number): Promise<boolean> {
-        throw new Error("Method not implemented yet.");
+    public async createControllerAssignment(eventId: number, userId: number, airportId: number, positionId: number): Promise<boolean> {
+        const sql = `
+            INSERT INTO eventcontrollerattendee (event_id, user_id, airport_id, position_id) VALUES (?, ?, ?, ?);
+        `;
+
+        const [result] = await pool.execute<ResultSetHeader>(
+            sql,
+            [eventId, userId, airportId, positionId]
+        );
+        
+        if (result.affectedRows > 0) return true;
+        else return false;
+    }
+
+    public async updateControllerAssignment(eventId: number, userId: number, change: IEventControllerAttendeeUpdateDto): Promise<boolean> {
+        const fields = [];
+        const values = [];
+
+        if (
+            change.airportId === undefined &&
+            change.positionId === undefined
+        ) return false;
+
+        const conn = await pool.getConnection();
+
+        try {
+            await conn.beginTransaction();
+
+            let updated = false;
+
+            if (change.airportId !== undefined) {
+                fields.push('airport_id = ?');
+                values.push(change.airportId);
+            }
+
+            if (change.positionId !== undefined) {
+                fields.push('position_id = ?');
+                values.push(change.positionId);
+            }
+
+            if (fields.length > 0) {
+                const sql = `
+                    UPDATE eventcontrollerattendee
+                    SET ${fields.join(', ')}
+                    WHERE event_id = ?
+                    AND user_id = ?
+                `;
+                
+                values.push(eventId, userId);
+
+                const [result] = await conn.execute<ResultSetHeader>(sql, values);
+                if (result.affectedRows > 0) updated = true;
+            }
+
+            await conn.commit();
+            return updated;
+        } catch (e) {
+            await conn.rollback();
+            throw e;
+        } finally {
+            conn.release();
+        }
+    }
+
+    public async deleteControllerAssignment(eventId: number, userId: number): Promise<boolean> {
+        const sql = `
+            DELETE FROM eventcontrollerattendee
+            WHERE event_id = ?
+            AND user_id = ?
+        `;
+
+        const [result] = await pool.execute<ResultSetHeader>(
+            sql,
+            [eventId, userId]
+        );
+
+        if (result.affectedRows > 0) return true;
+        else return false;
     }
 }

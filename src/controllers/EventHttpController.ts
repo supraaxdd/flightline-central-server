@@ -41,31 +41,31 @@ export const createEvent = async (req: Request<EventCreateParameter>, res: Respo
 
 export const updateEvent = async (req: Request<EventUpdateParameter, object, EventControllerAttendeeUpdateParameter>, res: Response) => {
     try {
-        const { hostId, dateHosted } = req.params;
-        const { userId, airportId, positionId } = req.body;
+        // const { hostId, dateHosted } = req.params;
+        // const { airportId, positionId } = req.body;
 
-        const eventUpdateDto: IEventUpdateDto = {};
-        const eventControllerAttendeeUpdateDto: IEventControllerAttendeeUpdateDto = {};
+        // const eventUpdateDto: IEventUpdateDto = {};
+        // const eventControllerAttendeeUpdateDto: IEventControllerAttendeeUpdateDto = {};
 
-        if (hostId !== undefined) {
-            eventUpdateDto.hostId = hostId;
-        }
+        // if (hostId !== undefined) {
+        //     eventUpdateDto.hostId = hostId;
+        // }
 
-        if (dateHosted !== undefined) {
-            eventUpdateDto.dateHosted = dateHosted;
-        }
+        // if (dateHosted !== undefined) {
+        //     eventUpdateDto.dateHosted = dateHosted;
+        // }
 
-        if (userId !== undefined) {
-            eventControllerAttendeeUpdateDto.userId = userId;
-        }
+        // if (userId !== undefined) {
+        //     eventControllerAttendeeUpdateDto.userId = userId;
+        // }
 
-        if (airportId !== undefined) {
-            eventControllerAttendeeUpdateDto.airportId = airportId;
-        }
+        // if (airportId !== undefined) {
+        //     eventControllerAttendeeUpdateDto.airportId = airportId;
+        // }
 
-        if (positionId !== undefined) {
-            eventControllerAttendeeUpdateDto.positionId = positionId;
-        }
+        // if (positionId !== undefined) {
+        //     eventControllerAttendeeUpdateDto.positionId = positionId;
+        // }
         
     } catch (e) {
         console.error(e);

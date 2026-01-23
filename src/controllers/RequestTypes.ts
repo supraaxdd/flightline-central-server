@@ -23,9 +23,15 @@ export type EventUpdateParameter = {
 }
 
 export type EventControllerAttendeeUpdateParameter = {
-    userId?: number;
     airportId?: number;
     positionId?: number;
+}
+
+export type EventControllerAttendeeCreationParameter = {
+    eventId: number,
+    userId: number,
+    airportId: number,
+    positionId: number
 }
 
 export type EventControllerAttendeeIdParameter = {
