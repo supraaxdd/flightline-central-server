@@ -5,6 +5,7 @@ import { IEventRepository } from "./IEventRepository";
 import { IEventController } from "../models/IEventController";
 import { IRole } from "../models/IRole";
 import { IEventSummaryDto } from "../dtos/IEventSummaryDto";
+import { IEventUpdateDto } from "../dtos/IEventUpdateDto";
 
 export class EventRepository implements IEventRepository {
     public async getEventById(id: number): Promise<IEvent | null> {
@@ -182,7 +183,67 @@ export class EventRepository implements IEventRepository {
         return result.affectedRows > 0;
     }
 
-    public async update(id: number): Promise<boolean> {
-        return true;
+    public async delete(id: number): Promise<boolean> {
+        const sql = `
+            DELETE FROM event
+            WHERE id = ?
+        `;
+
+        const [result] = await pool.execute<ResultSetHeader>(
+            sql,
+            id
+        );
+
+        if (result.affectedRows > 0) return true;
+        else return false;
+    }
+
+    public async update(id: number, change: IEventUpdateDto): Promise<boolean> {
+        const fields = [];
+        const values = [];
+
+        if (
+            change.hostId === undefined &&
+            change.dateHosted === undefined
+        ) return false;
+
+        const conn = await pool.getConnection();
+
+        try {
+            await conn.beginTransaction();
+
+            let updated = false;
+
+            if (change.hostId !== undefined) {
+                fields.push('host_id = ?');
+                values.push(change.hostId);
+            }
+
+            if (change.dateHosted !== undefined) {
+                fields.push('date_hosted = ?');
+                values.push(change.dateHosted);
+            }
+
+            if (fields.length > 0) {
+                const sql = `
+                    UPDATE event
+                    SET ${fields.join(', ')}
+                    WHERE id = ?
+                `;
+
+                values.push(id);
+
+                const [result] = await conn.execute<ResultSetHeader>(sql, values);
+                if (result.affectedRows > 0) updated = true;
+            }
+
+            await conn.commit();
+            return updated;
+        } catch (e) {
+            await conn.rollback();
+            throw e;
+        } finally {
+            conn.release();
+        }
     }
 }

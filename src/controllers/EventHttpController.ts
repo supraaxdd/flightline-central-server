@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import { EventControllerAttendeeUpdateParameter, EventCreateParameter, EventUpdateParameter, IdParameter } from "./RequestTypes";
+import { EventCreateParameter, EventUpdateParameter, IdParameter } from "./RequestTypes";
 import { EventService } from "../services/EventService";
 import { IEventUpdateDto } from "../infrastructure/dtos/IEventUpdateDto";
-import { IEventControllerAttendeeUpdateDto } from "../infrastructure/dtos/IEventControllerAttendeeUpdateDto";
 
 const eventService: EventService = new EventService();
 
@@ -39,34 +38,37 @@ export const createEvent = async (req: Request<EventCreateParameter>, res: Respo
     }
 }
 
-export const updateEvent = async (req: Request<EventUpdateParameter, object, EventControllerAttendeeUpdateParameter>, res: Response) => {
+export const deleteEvent = async (req: Request<IdParameter>, res: Response) => {
     try {
-        // const { hostId, dateHosted } = req.params;
-        // const { airportId, positionId } = req.body;
+        const { id } = req.params;
+        const success = await eventService.deleteEvent(id);
+        res.status(200).json(success);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json(e);
+    }
+}
 
-        // const eventUpdateDto: IEventUpdateDto = {};
-        // const eventControllerAttendeeUpdateDto: IEventControllerAttendeeUpdateDto = {};
+export const updateEvent = async (req: Request<IdParameter, object, EventUpdateParameter>, res: Response) => {
+    try {
+        const { id } = req.params;
+        const eventId = id;
 
-        // if (hostId !== undefined) {
-        //     eventUpdateDto.hostId = hostId;
-        // }
+        const { hostId, dateHosted } = req.body;
 
-        // if (dateHosted !== undefined) {
-        //     eventUpdateDto.dateHosted = dateHosted;
-        // }
+        const updateDto: IEventUpdateDto = {};
 
-        // if (userId !== undefined) {
-        //     eventControllerAttendeeUpdateDto.userId = userId;
-        // }
+        if (hostId !== undefined) {
+            updateDto.hostId = hostId;
+        }
 
-        // if (airportId !== undefined) {
-        //     eventControllerAttendeeUpdateDto.airportId = airportId;
-        // }
+        if (dateHosted !== undefined) {
+            updateDto.dateHosted = dateHosted;
+        }
 
-        // if (positionId !== undefined) {
-        //     eventControllerAttendeeUpdateDto.positionId = positionId;
-        // }
+        const success = await eventService.updateEvent(eventId, updateDto);
         
+        res.status(200).json(success);
     } catch (e) {
         console.error(e);
         res.status(500).json(e);
