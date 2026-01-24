@@ -191,7 +191,7 @@ export class EventRepository implements IEventRepository {
 
         const [result] = await pool.execute<ResultSetHeader>(
             sql,
-            id
+            [id]
         );
 
         if (result.affectedRows > 0) return true;
