@@ -1,4 +1,6 @@
 export interface IEventControllerAttendeeUpdateDto {
-    airportId?: number;
-    positionId?: number;
+    eventId: number;
+    userId: number;
+    airportId: number;
+    positionId: number;
 }

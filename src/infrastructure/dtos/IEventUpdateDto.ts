@@ -1,4 +1,4 @@
 export interface IEventUpdateDto {
-	hostId?: number;
-	dateHosted?: Date;
+	hostId: number;
+	dateHosted: Date;
 }
