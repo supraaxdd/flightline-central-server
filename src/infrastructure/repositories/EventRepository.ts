@@ -8,6 +8,18 @@ import { IEventSummaryDto } from "../dtos/IEventSummaryDto";
 import { IEventUpdateDto } from "../dtos/IEventUpdateDto";
 
 export class EventRepository implements IEventRepository {
+    private static instance?: EventRepository;
+
+    private constructor() { };
+
+    public static getInstance() {
+        if (!EventRepository.instance) {
+            EventRepository.instance = new EventRepository();
+        }
+
+        return EventRepository.instance;
+    }
+
     public async getEventById(id: number): Promise<IEvent | null> {
         let sql = `
             SELECT 
@@ -169,7 +181,10 @@ export class EventRepository implements IEventRepository {
         return events;
     }
 
-    public async create(userId: number, dateHosted: Date): Promise<boolean> {
+    public async create(
+        userId: number,
+        dateHosted: Date
+    ): Promise<boolean> {
         const sql = `
             INSERT INTO event (host_id, date_hosted)
             VALUES (?, ?)
@@ -198,7 +213,10 @@ export class EventRepository implements IEventRepository {
         else return false;
     }
 
-    public async update(id: number, change: IEventUpdateDto): Promise<boolean> {
+    public async update(
+        id: number,
+        change: IEventUpdateDto
+    ): Promise<boolean> {
         const fields = [];
         const values = [];
 

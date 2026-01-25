@@ -2,18 +2,43 @@ import { IEventUpdateDto } from "../infrastructure/dtos/IEventUpdateDto";
 import { EventRepository } from "../infrastructure/repositories/EventRepository";
 
 export class EventService {
-    private eventRepo: EventRepository = new EventRepository();
+    private static instance?: EventService;
 
-    getEventById = async (id: number) => await this.eventRepo.getEventById(id);
+    private constructor() { };
 
-    getEventsHostedByUserById = async (userId: number) => await this.eventRepo.getEventsHostedByUserById(userId);
+    public static getInstance = () => {
+        if (!EventService.instance) {
+            EventService.instance = new EventService();
+        }
 
-    createEvent = async (hostId: number, dateHosted: Date) => await this.eventRepo.create(hostId, dateHosted);
+        return EventService.instance;
+    }
 
-    deleteEvent = async (id: number) => await this.eventRepo.delete(id);
+    private eventRepo: EventRepository = EventRepository.getInstance();
 
-    updateEvent = async (
+    public async getEventById(id: number) {
+        return await this.eventRepo.getEventById(id);
+    }
+
+    public async getEventsHostedByUserById(userId: number) {
+        return await this.eventRepo.getEventsHostedByUserById(userId);
+    }
+
+    public async createEvent(
+        hostId: number,
+        dateHosted: Date
+    ) {
+        return await this.eventRepo.create(hostId, dateHosted);
+    }
+
+    public async deleteEvent(id: number) {
+        return await this.eventRepo.delete(id);
+    }
+
+    public async updateEvent(
         eventId: number,
         update: IEventUpdateDto
-    ) => await this.eventRepo.update(eventId, update);
+    ) {
+        return await this.eventRepo.update(eventId, update);
+    }
 }

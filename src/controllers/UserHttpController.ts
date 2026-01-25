@@ -3,7 +3,7 @@ import { IdParameter, DiscordIdParameter, UsernameParameter, UserDataParameter, 
 import { UserService } from "../services/UserService";
 import { IUserUpdateDto } from "../infrastructure/dtos/IUserUpdateDto";
 
-const userService: UserService = new UserService();
+const userService: UserService = UserService.getInstance();
 
 export const getUserById = async (req: Request<IdParameter>, res: Response) => {
     try {

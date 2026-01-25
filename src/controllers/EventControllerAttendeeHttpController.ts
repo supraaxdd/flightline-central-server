@@ -3,7 +3,7 @@ import { EventControllerAttendeeService } from "../services/EventControllerAtten
 import { EventControllerAttendeeCreationParameter, EventControllerAttendeeIdParameter, EventControllerAttendeeUpdateParameter } from "./RequestTypes";
 import { IEventControllerAttendeeUpdateDto } from "../infrastructure/dtos/IEventControllerAttendeeUpdateDto";
 
-const ecaService: EventControllerAttendeeService = new EventControllerAttendeeService();
+const ecaService: EventControllerAttendeeService = EventControllerAttendeeService.getInstance();
 
 export const getController = async (req: Request<EventControllerAttendeeIdParameter>, res: Response) => {
     try {

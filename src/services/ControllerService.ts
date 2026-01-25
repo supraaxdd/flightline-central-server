@@ -2,17 +2,37 @@ import { IControllerUpdateDto } from "../infrastructure/dtos/IControllerUpdateDt
 import { ControllerRepository } from "../infrastructure/repositories/ControllerRepository";
 
 export class ControllerService {
-    private controllerRepo: ControllerRepository = new ControllerRepository();
+    private static instance?: ControllerService;
 
-    getByUserId = async (id: number) => await this.controllerRepo.getByUserId(id);
+    private constructor() { };
 
-    createController = async (id: number) => await this.controllerRepo.create(id, new Date());
+    public static getInstance = () => {
+        if (!ControllerService.instance) {
+            ControllerService.instance = new ControllerService();
+        }
 
-    deleteController = async (id: number) => await this.controllerRepo.delete(id);
+        return ControllerService.instance;
+    }
 
-    updateController = async (
+    private controllerRepo: ControllerRepository = ControllerRepository.getInstance();
+
+    public async getByUserId(id: number) {
+        return await this.controllerRepo.getByUserId(id);
+    }
+
+    public async createController(id: number) {
+        return await this.controllerRepo.create(id, new Date());
+    }
+
+    public async deleteController(id: number) {
+        return await this.controllerRepo.delete(id);
+    }
+
+    public async updateController(
         id: number,
         controllerChange: IControllerUpdateDto
-    ) => await this.controllerRepo.update(id, controllerChange);
+    ) {
+        return await this.controllerRepo.update(id, controllerChange);
+    }
 }
 

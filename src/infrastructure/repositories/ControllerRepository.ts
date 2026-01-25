@@ -6,7 +6,20 @@ import { IControllerRepository } from "./IControllerRepository";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 export class ControllerRepository implements IControllerRepository {
-    private CONTROLLER_ROLE_ID = 2;
+    private static instance?: ControllerRepository;
+    private readonly CONTROLLER_ROLE_ID = 2;
+    private readonly GROUND_POSITION_ID = 2;
+
+    private constructor() { };
+
+    public static getInstance() {
+        if (!ControllerRepository.instance) {
+            ControllerRepository.instance = new ControllerRepository();
+        }
+
+        return ControllerRepository.instance;
+    }
+    
 
     public async getByUserId(id: number): Promise<IController | null> {
         let sql = `
@@ -94,7 +107,7 @@ export class ControllerRepository implements IControllerRepository {
                     INSERT INTO controllerqualification (user_id, position_id)
                     VALUES (?, ?)
                 `,
-                [userId, 1]
+                [userId, this.GROUND_POSITION_ID]
             );
 
             // 3. userrole (Controller role)
@@ -160,7 +173,10 @@ export class ControllerRepository implements IControllerRepository {
         }
     }
 
-    public async update(userId: number, controllerChange: IControllerUpdateDto): Promise<boolean> {
+    public async update(
+        userId: number,
+        controllerChange: IControllerUpdateDto
+    ): Promise<boolean> {
         const fields = [];
         const values = [];
 
@@ -209,7 +225,11 @@ export class ControllerRepository implements IControllerRepository {
         }
     }
 
-    private async updateQualification(conn: PoolConnection, userId: number, positionId: number): Promise<boolean> {
+    private async updateQualification(
+        conn: PoolConnection,
+        userId: number,
+        positionId: number
+    ): Promise<boolean> {
         const sql = `
             UPDATE controllerqualification
             SET position_id = ?

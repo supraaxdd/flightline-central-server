@@ -3,7 +3,7 @@ import { EventCreateParameter, EventUpdateParameter, IdParameter } from "./Reque
 import { EventService } from "../services/EventService";
 import { IEventUpdateDto } from "../infrastructure/dtos/IEventUpdateDto";
 
-const eventService: EventService = new EventService();
+const eventService: EventService = EventService.getInstance();
 
 export const getEventById = async (req: Request<IdParameter>, res: Response) => {
     try {

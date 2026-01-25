@@ -3,7 +3,7 @@ import { IdParameter, ControllerProfileUpdateParameter } from "./RequestTypes";
 import { ControllerService } from "../services/ControllerService";
 import { IControllerUpdateDto } from "../infrastructure/dtos/IControllerUpdateDto";
 
-const controllerService: ControllerService = new ControllerService();
+const controllerService: ControllerService = ControllerService.getInstance();
 
 export const getControllerById = async (req: Request<IdParameter>, res: Response) => {
     try {

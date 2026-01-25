@@ -5,7 +5,22 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { IEventControllerAttendeeUpdateDto } from "../dtos/IEventControllerAttendeeUpdateDto";
 
 export class EventControllerAttendeeRepository implements IEventControllerAttendeeRepository {
-    public async getController(eventId: number, userId: number): Promise<IEventController | null> {
+    private static instance?: EventControllerAttendeeRepository;
+
+    private constructor() { };
+
+    public static getInstance() {
+        if (!EventControllerAttendeeRepository.instance) {
+            EventControllerAttendeeRepository.instance = new EventControllerAttendeeRepository();
+        }
+
+        return EventControllerAttendeeRepository.instance;
+    }
+
+    public async getController(
+        eventId: number,
+        userId: number
+    ): Promise<IEventController | null> {
         const sql = `
             SELECT
                 u.id            AS user_id,

@@ -2,36 +2,65 @@ import { IUserUpdateDto } from "../infrastructure/dtos/IUserUpdateDto";
 import { UserRepository } from "../infrastructure/repositories/UserRepository"
 
 export class UserService {
-	private userRepo: UserRepository = new UserRepository()
+	private static instance?: UserService;
 
-	getUserById = async (id: number) => await this.userRepo.getById(id);
-	
-	getUserByDiscordId = async (discordId: string) => await this.userRepo.getByDiscordId(discordId);
-	
-	getUserByUsername = async (username: string) => await this.userRepo.getByUsername(username);
-	
-	getRoles = async (id: number) => await this.userRepo.getRoles(id);
+	private constructor() { };
 
-	existsById = async (id: number) => await this.userRepo.existsById(id);
+	public static getInstance = () => {
+		if (!UserService.instance) {
+			UserService.instance = new UserService();
+		}
+
+		return UserService.instance;
+	}
+
+	private userRepo: UserRepository = UserRepository.getInstance();
+
+	public async getUserById(id: number) {
+		return await this.userRepo.getById(id);
+	}
 	
-	existsByDiscordId = async (discordId: string) => await this.userRepo.existsByDiscordId(discordId);
+	public async getUserByDiscordId(discordId: string) {
+		return await this.userRepo.getByDiscordId(discordId);
+	}
 	
-	deleteUser = async (id: number) => {
-		const exists = this.existsById(id);
+	public async getUserByUsername(username: string) {
+		return await this.userRepo.getByUsername(username);
+	}
+	
+	public async getRoles(id: number) {
+		return await this.userRepo.getRoles(id);
+	}
+
+	public async existsById(id: number) {
+		return await this.userRepo.existsById(id);
+	}
+	
+	public async existsByDiscordId(discordId: string) {
+		return await this.userRepo.existsByDiscordId(discordId);
+	}
+	
+	public async deleteUser(id: number) {
+		const exists = await this.existsById(id);
 		if (!exists) return true;
 
 		return await this.userRepo.delete(id);
 	}
 
-	createUser = async (discordId: string, username: string) => {
-		const exists = this.existsByDiscordId(discordId);
+	public async createUser(
+		discordId: string,
+		username: string
+	) {
+		const exists = await this.existsByDiscordId(discordId);
 		if (!exists) return false;
 
 		return await this.userRepo.create(discordId, username);
 	}
 
-	updateUser = async (
+	public async updateUser(
 		id: number,
 		change: IUserUpdateDto
-	) => await this.userRepo.update(id, change);
+	) {
+		return await this.userRepo.update(id, change);
+	}
 }

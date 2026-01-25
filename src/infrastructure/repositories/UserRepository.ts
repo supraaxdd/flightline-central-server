@@ -6,6 +6,18 @@ import { IRole } from "../models/IRole";
 import { IUserUpdateDto } from "../dtos/IUserUpdateDto";
 
 export class UserRepository implements IUserRepository {
+    private static instance?: UserRepository;
+
+    private constructor() { };
+
+    public static getInstance() {
+        if (!UserRepository.instance) {
+            UserRepository.instance = new UserRepository();
+        }
+
+        return UserRepository.instance;
+    }
+
     public async getById(id: number): Promise<IUser | null> {
         const sql = `
             SELECT * FROM user
@@ -117,7 +129,10 @@ export class UserRepository implements IUserRepository {
         return row.length > 0;
     }
 
-    public async create(discordId: string, username: string): Promise<boolean> {
+    public async create(
+        discordId: string,
+        username: string
+    ): Promise<boolean> {
         const sql = `
             INSERT INTO user (discord_id, username)
             VALUES (?, ?)
@@ -133,7 +148,10 @@ export class UserRepository implements IUserRepository {
         return true;
     }
 
-    public async update(id: number, change: IUserUpdateDto): Promise<boolean> {
+    public async update(
+        id: number,
+        change: IUserUpdateDto
+    ): Promise<boolean> {
         const fields = [];
         const values = [];
 
