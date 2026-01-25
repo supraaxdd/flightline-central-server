@@ -4,11 +4,11 @@ import { IControllerUpdateDto } from "../dtos/IControllerUpdateDto";
 import { IController } from "../models/IController";
 import { IControllerRepository } from "./IControllerRepository";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { ControllerPosition } from "../enums/ControllerPosition";
 
 export class ControllerRepository implements IControllerRepository {
     private static instance?: ControllerRepository;
     private readonly CONTROLLER_ROLE_ID = 2;
-    private readonly GROUND_POSITION_ID = 2;
 
     private constructor() { };
 
@@ -107,7 +107,7 @@ export class ControllerRepository implements IControllerRepository {
                     INSERT INTO controllerqualification (user_id, position_id)
                     VALUES (?, ?)
                 `,
-                [userId, this.GROUND_POSITION_ID]
+                [userId, ControllerPosition.GROUND]
             );
 
             // 3. userrole (Controller role)

@@ -6,7 +6,7 @@ export class EventService {
 
     private constructor() { };
 
-    public static getInstance = () => {
+    public static getInstance() {
         if (!EventService.instance) {
             EventService.instance = new EventService();
         }

@@ -6,7 +6,7 @@ export class ControllerService {
 
     private constructor() { };
 
-    public static getInstance = () => {
+    public static getInstance() {
         if (!ControllerService.instance) {
             ControllerService.instance = new ControllerService();
         }
