@@ -181,6 +181,19 @@ export class EventRepository implements IEventRepository {
         return events;
     }
 
+    public async exists(id: number): Promise<boolean> {
+        const sql = `
+            SELECT 1 FROM event WHERE id = ?
+        `;
+
+        const [rows] = await pool.execute<RowDataPacket[]>(
+            sql,
+            [id]
+        );
+
+        return rows.length > 0;
+    }
+
     public async create(
         userId: number,
         dateHosted: Date
