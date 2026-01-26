@@ -1,4 +1,4 @@
 export interface IUserUpdateDto {
-    discordId: string;
-    username: string;
+    discordId?: string;
+    username?: string;
 }
