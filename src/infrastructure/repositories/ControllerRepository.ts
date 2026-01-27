@@ -83,6 +83,19 @@ export class ControllerRepository implements IControllerRepository {
         return controller;
     }
 
+    public async existsByUserId(id: number): Promise<boolean> {
+        const sql = `
+            SELECT 1 FROM controllerprofile WHERE user_id = ?
+        `;
+
+        const [rows] = await pool.execute<RowDataPacket[]>(
+            sql,
+            [id]
+        );
+
+        return rows.length > 0;
+    }
+
     public async create(
         userId: number,
         controllerSince: Date

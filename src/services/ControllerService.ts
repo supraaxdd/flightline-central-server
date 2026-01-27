@@ -20,11 +20,23 @@ export class ControllerService {
         return await this.controllerRepo.getByUserId(id);
     }
 
+    public async existsByUserId(id: number) {
+        return await this.controllerRepo.existsByUserId(id);
+    }
+
     public async createController(id: number) {
+        const exists = await this.existsByUserId(id);
+
+        // Future implementation of the error class story... ref. User/Event services for more in depth explanations
+        if (exists) return false;
         return await this.controllerRepo.create(id, new Date());
     }
 
     public async deleteController(id: number) {
+        const exists = await this.existsByUserId(id);
+
+        // Future implementation of the error class story... ref. User/Event services for more in depth explanations
+        if (!exists) return true;
         return await this.controllerRepo.delete(id);
     }
 
@@ -32,6 +44,10 @@ export class ControllerService {
         id: number,
         controllerChange: IControllerUpdateDto
     ) {
+        const exists = await this.existsByUserId(id);
+
+        // Future implementation of the error class story... ref. User/Event services for more in depth explanations
+        if (!exists) return false;
         return await this.controllerRepo.update(id, controllerChange);
     }
 }

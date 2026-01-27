@@ -89,6 +89,21 @@ export class EventControllerAttendeeRepository implements IEventControllerAttend
         return eventController;
     }
 
+    public async controllerAssignmentExists(eventId: number, userId: number): Promise<boolean> {
+        const sql = `
+            SELECT 1 FROM eventcontrollerattendee
+            WHERE event_id = ?
+            AND user_id = ?
+        `;
+
+        const [rows] = await pool.execute<RowDataPacket[]>(
+            sql,
+            [eventId, userId]
+        );
+
+        return rows.length > 0;
+    }
+
     public async createControllerAssignment(eventId: number, userId: number, airportId: number, positionId: number): Promise<boolean> {
         const sql = `
             INSERT INTO eventcontrollerattendee (event_id, user_id, airport_id, position_id) VALUES (?, ?, ?, ?);
