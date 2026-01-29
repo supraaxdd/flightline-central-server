@@ -60,14 +60,19 @@ export class EventRepository implements IEventRepository {
                 a.name AS airport_name,
                 p.id AS position_id,
                 p.name AS position_name
-            FROM eventcontrollerattendee eca, event e, user u, airport a, controllerposition p, controllerprofile cp
-            WHERE eca.event_id = e.id
-            AND eca.user_id = u.id
-            AND eca.airport_id = a.id
-            AND eca.position_id = p.id
-            AND cp.user_id = u.id
-            AND e.id = ?
-        `;
+            FROM eventcontrollerattendee eca
+				JOIN user u
+                ON eca.user_id = u.id
+				JOIN airport a
+                ON eca.airport_id = a.id
+                JOIN controllerposition p
+                ON eca.position_id = p.id
+                JOIN controllerprofile cp
+                ON cp.user_id = u.id
+                RIGHT JOIN event e
+                ON eca.event_id = e.id
+			WHERE e.id = ?;
+		`;
 
         const [rows] = await pool.execute<RowDataPacket[]>(
             sql,
@@ -93,6 +98,11 @@ export class EventRepository implements IEventRepository {
         }
 
         for (const row of rows) {
+			// If the controller_user_id (a NOT NULL column) is null, then there must be no controllers in this event
+			if (row.controller_user_id === null) {
+				break;
+			}
+
             const eventController: IEventController = {
                 controller: {
                     user: {
