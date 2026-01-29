@@ -97,12 +97,12 @@ export class EventRepository implements IEventRepository {
             controllers: []
         }
 
-        for (const row of rows) {
-			// If the controller_user_id (a NOT NULL column) is null, then there must be no controllers in this event
-			if (row.controller_user_id === null) {
-				break;
-			}
+		// If the controller_user_id (a NOT NULL column) is null, then there must be no controllers in this event
+		if (eventData.controller_user_id === null) {
+			return event;
+		}
 
+        for (const row of rows) {
             const eventController: IEventController = {
                 controller: {
                     user: {
