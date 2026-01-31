@@ -9,7 +9,7 @@ export interface IUserRepository {
     getRoles(id: number): Promise<IRole[] | null>;
     existsById(id: number): Promise<boolean>;
     existsByDiscordId(discordId: string): Promise<boolean>;
-    create(discordId: string, username: string): Promise<boolean>;
+    create(discordId: string, username: string): Promise<void>;
     update(id: number, change: IUserUpdateDto): Promise<boolean>;
-    delete(id: number): Promise<boolean>;
+    delete(id: number): Promise<void>;
 }

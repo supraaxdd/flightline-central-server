@@ -83,13 +83,13 @@ export class UserRepository implements IUserRepository {
             [id]
         );
 
-        if (rows.length === 0) return null;
+        const userRoles: IRole[] = [];
+
+        if (rows.length === 0) return userRoles;
 
         const roleData = rows[0];
-        
-        if (roleData === undefined) return null;
 
-        const userRoles: IRole[] = [];
+        if (roleData === undefined) return userRoles;
 
         for (const row of rows) {
             if (row.role_id) {
@@ -132,7 +132,7 @@ export class UserRepository implements IUserRepository {
     public async create(
         discordId: string,
         username: string
-    ): Promise<boolean> {
+    ): Promise<void> {
         const sql = `
             INSERT INTO user (discord_id, username)
             VALUES (?, ?)
@@ -142,10 +142,6 @@ export class UserRepository implements IUserRepository {
             sql,
             [discordId, username],
         );
-
-        if (rows.affectedRows === 0) return false;
-
-        return true;
     }
 
     public async update(
@@ -200,7 +196,7 @@ export class UserRepository implements IUserRepository {
         }
     }
 
-    public async delete(id: number): Promise<boolean> {
+    public async delete(id: number): Promise<void> {
         const sql = `
             DELETE FROM user
             WHERE id = ?
@@ -210,9 +206,5 @@ export class UserRepository implements IUserRepository {
             sql,
             [id]
         );
-
-        if (rows.affectedRows === 0) return false;
-
-        return true;
     }
 }
