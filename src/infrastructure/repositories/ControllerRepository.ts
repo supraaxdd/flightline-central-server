@@ -19,7 +19,7 @@ export class ControllerRepository implements IControllerRepository {
 
         return ControllerRepository.instance;
     }
-    
+
 
     public async getByUserId(id: number): Promise<IController | null> {
         let sql = `
@@ -99,7 +99,7 @@ export class ControllerRepository implements IControllerRepository {
     public async create(
         userId: number,
         controllerSince: Date
-    ): Promise<boolean> {
+    ): Promise<void> {
         const conn = await pool.getConnection();
 
         try {
@@ -133,7 +133,6 @@ export class ControllerRepository implements IControllerRepository {
             );
 
             await conn.commit();
-            return true;
         } catch (err) {
             await conn.rollback();
             throw err;
@@ -142,7 +141,7 @@ export class ControllerRepository implements IControllerRepository {
         }
     }
 
-    public async delete(id: number): Promise<boolean> {
+    public async delete(id: number): Promise<void> {
         const conn = await pool.getConnection();
 
         try {
@@ -177,7 +176,6 @@ export class ControllerRepository implements IControllerRepository {
             );
 
             await conn.commit();
-            return true;
         } catch (err) {
             await conn.rollback();
             throw err;
@@ -189,47 +187,40 @@ export class ControllerRepository implements IControllerRepository {
     public async update(
         userId: number,
         controllerChange: IControllerUpdateDto
-    ): Promise<boolean> {
-        const fields = [];
-        const values = [];
-
+    ): Promise<void> {
         if (
             controllerChange.controllerSince === undefined &&
             controllerChange.qualificationPositionId === undefined
-        ) return false;
+        ) return;
 
         const conn = await pool.getConnection();
 
         try {
             await conn.beginTransaction();
 
-            let updated = false;
-
             if (controllerChange.controllerSince !== undefined) {
-                fields.push('controller_since = ?');
-                values.push(controllerChange.controllerSince);
+                await conn.execute(
+                    `
+                    UPDATE controllerprofile
+                    SET controller_since = ?
+                    WHERE user_id = ?
+                `,
+                    [controllerChange.controllerSince, userId]
+                );
             }
 
             if (controllerChange.qualificationPositionId !== undefined) {
-                const ok = await this.updateQualification(conn, userId, controllerChange.qualificationPositionId);
-                if (!ok) throw new Error('Qualification update failed');
-                updated = true;
-            }
-
-            if (fields.length > 0) {
-                const sql = `
-                    UPDATE controllerprofile
-                    SET ${fields.join(', ')}
+                await conn.execute(
+                    `
+                    UPDATE controllerqualification
+                    SET position_id = ?
                     WHERE user_id = ?
-                `;
-                values.push(userId);
-
-                const [result] = await conn.execute<ResultSetHeader>(sql, values);
-                if (result.affectedRows > 0) updated = true;
+                `,
+                    [controllerChange.qualificationPositionId, userId]
+                );
             }
 
             await conn.commit();
-            return updated;
         } catch (e) {
             await conn.rollback();
             throw e;
@@ -237,24 +228,4 @@ export class ControllerRepository implements IControllerRepository {
             conn.release();
         }
     }
-
-    private async updateQualification(
-        conn: PoolConnection,
-        userId: number,
-        positionId: number
-    ): Promise<boolean> {
-        const sql = `
-            UPDATE controllerqualification
-            SET position_id = ?
-            WHERE user_id = ?
-        `;
-
-        const [result] = await conn.execute<ResultSetHeader>(
-            sql,
-            [positionId, userId]
-        );
-
-        return result.affectedRows > 0;
-    }
-
 }
