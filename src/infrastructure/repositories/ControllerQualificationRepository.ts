@@ -1,4 +1,4 @@
-import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { RowDataPacket } from "mysql2";
 import { pool } from "../../config/config";
 import { IControllerPosition } from "../models/IControllerPosition";
 import { IControllerQualificationRepository } from "./IControllerQualificationRepository";

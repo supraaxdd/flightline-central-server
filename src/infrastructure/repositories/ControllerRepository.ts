@@ -1,9 +1,8 @@
-import { PoolConnection } from "mysql2/promise";
 import { pool } from "../../config/config";
 import { IControllerUpdateDto } from "../dtos/IControllerUpdateDto";
 import { IController } from "../models/IController";
 import { IControllerRepository } from "./IControllerRepository";
-import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { RowDataPacket } from "mysql2";
 import { ControllerPosition } from "../enums/ControllerPosition";
 
 export class ControllerRepository implements IControllerRepository {

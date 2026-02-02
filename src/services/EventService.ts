@@ -1,5 +1,6 @@
 import { IEventUpdateDto } from "../infrastructure/dtos/IEventUpdateDto";
 import { EventRepository } from "../infrastructure/repositories/EventRepository";
+import { UserService } from "./UserService";
 
 export class EventService {
     private static instance?: EventService;
@@ -15,6 +16,7 @@ export class EventService {
     }
 
     private eventRepo: EventRepository = EventRepository.getInstance();
+    private userService: UserService = UserService.getInstance();
 
     public async getEventById(id: number) {
         return await this.eventRepo.getEventById(id);
@@ -32,16 +34,24 @@ export class EventService {
         hostId: number,
         dateHosted: Date
     ) {
-        // Not sure if we need an exists check here, as the same host could host multiple events in one day
+        const userExists = await this.userService.existsById(hostId);
+        if (!userExists) {
+            throw Error("Host User not found");
+        }
+
+        const userRoles = await this.userService.getRoles(hostId);
+        if (!userRoles?.find(r => r.name === "Event Host")) {
+            throw Error("Host user does not have permission to host events");
+        }
+
         return await this.eventRepo.create(hostId, dateHosted);
     }
 
     public async deleteEvent(id: number) {
         const exists = await this.exists(id);
-
-        // During the implementation of the error class story, this should throw an error
-        // with an appropriate status code, where this error would be handled in the controller
-        if (!exists) return true;
+        if (!exists) {
+            throw Error("Event not found");
+        }
 
         return await this.eventRepo.delete(id);
     }
@@ -51,9 +61,22 @@ export class EventService {
         update: IEventUpdateDto
     ) {
         const exists = await this.exists(eventId);
+        if (!exists) {
+            throw Error("Event not found");
+        }
 
-        // This should throw an error, which should be implemented during the error class implementation story
-        if (!exists) return false;
+        if (update.hostId !== undefined) {
+            const userExists = await this.userService.existsById(update.hostId);
+            if (!userExists) {
+                throw Error("Host user not found");
+            }
+
+            const userRoles = await this.userService.getRoles(update.hostId);
+            if (!userRoles?.find(r => r.name === "Event Host")) {
+                throw Error("Host user does not have permission to host events");
+            }
+        }
+
         return await this.eventRepo.update(eventId, update);
     }
 }
