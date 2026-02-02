@@ -1,6 +1,7 @@
 import { IEventControllerAttendeeUpdateDto } from "../infrastructure/dtos/IEventControllerAttendeeUpdateDto";
 import { EventControllerAttendeeRepository } from "../infrastructure/repositories/EventControllerAttendeeRepository";
 import { AirportService } from "./AirportService";
+import { ControllerPositionService } from "./ControllerPositionService";
 import { UserService } from "./UserService";
 
 export class EventControllerAttendeeService {
@@ -19,6 +20,7 @@ export class EventControllerAttendeeService {
     private ecaRepo: EventControllerAttendeeRepository = EventControllerAttendeeRepository.getInstance();
     private userService: UserService = UserService.getInstance();
     private airportService: AirportService = AirportService.getInstance();
+    private positionService: ControllerPositionService = ControllerPositionService.getInstance();
 
     public async getController(eventId: number, userId: number) {
         return await this.ecaRepo.getController(eventId, userId);
@@ -49,12 +51,15 @@ export class EventControllerAttendeeService {
             throw Error("User does not have permission to be a controller");
         }
 
-        const airport = await this.airportService.exists(airportId);
-        if (!airport) {
+        const airportExists = await this.airportService.exists(airportId);
+        if (!airportExists) {
             throw Error("Airport not found");
         }
 
-        // TODO: Implement check for the position if exists
+        const positionExists = await this.positionService.exists(positionId);
+        if (!positionExists) {
+            throw Error("Position not found");
+        }
 
         return await this.ecaRepo.createControllerAssignment(eventId, userId, airportId, positionId);
     }
@@ -82,7 +87,10 @@ export class EventControllerAttendeeService {
         }
 
         if (change.positionId !== undefined) {
-            // TODO: Implement check logic to see if position exists
+            const positionExists = await this.positionService.exists(change.positionId);
+            if (!positionExists) {
+                throw Error("Position not found");
+            }
         }
         
         return await this.ecaRepo.updateControllerAssignment(eventId, userId, change);

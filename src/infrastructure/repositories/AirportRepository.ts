@@ -1,4 +1,4 @@
-import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { RowDataPacket } from "mysql2";
 import { pool } from "../../config/config";
 import { IAirport } from "../models/IAirport";
 import { IAirportRepository } from "./IAirportRepository";
@@ -74,31 +74,4 @@ export class AirportRepository implements IAirportRepository {
 
 		return rows.length > 0;
 	}
-
-	public async create(name: string): Promise<boolean> {
-		const sql = `
-			INSERT INTO airport (name) VALUES (?)
-		`;
-
-		const [result] = await pool.execute<ResultSetHeader>(
-			sql,
-			[name]
-		);
-
-		return result.affectedRows > 0;
-	}
-
-	public async delete(id: number): Promise<boolean> {
-		const sql = `
-			DELETE FROM airport WHERE id = ?
-		`;
-
-		const [result] = await pool.execute<ResultSetHeader>(
-			sql,
-			[id]
-		);
-
-		return result.affectedRows > 0;
-	}
-	
 }
