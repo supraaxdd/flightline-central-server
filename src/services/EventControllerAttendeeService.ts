@@ -78,6 +78,7 @@ export class EventControllerAttendeeService {
         // a valid user was already being used for the assignment.
         // We will not allow to change to user of the assignment, instead it will have to be replaced,
         // because it is a primary key in the database as a composite PK
+        // This may be subject to change in the future
 
         if (change.airportId !== undefined) {
             const airportExists = await this.airportService.exists(change.airportId);

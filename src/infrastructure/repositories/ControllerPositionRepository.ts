@@ -1,7 +1,7 @@
 import { IControllerPosition } from "../models/IControllerPosition";
 import { IControllerPositionRepository } from "./IControllerPositionRepository";
 import { pool } from "../../config/config";
-import { RowDataPacket, ResultSetHeader } from "mysql2";
+import { RowDataPacket } from "mysql2";
 
 export class ControllerPositionRepository implements IControllerPositionRepository {
 	private static instance?: ControllerPositionRepository;
