@@ -12,7 +12,18 @@ export const getController = async (req: Request<EventControllerAttendeeIdParame
         res.status(200).json(eventController);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+        
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
 
@@ -24,7 +35,18 @@ export const createControllerAssignment = async (req: Request<EventControllerAtt
         res.status(200).json(success);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
 
@@ -48,7 +70,18 @@ export const updateControllerAssignment = async (req: Request<EventControllerAtt
         res.status(200).json(success);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+        
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
 
@@ -60,6 +93,17 @@ export const deleteControllerAssignment = async (req: Request<EventControllerAtt
         res.status(200).json(success);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+        
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }

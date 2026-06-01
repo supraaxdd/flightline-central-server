@@ -12,7 +12,18 @@ export const getControllerById = async (req: Request<IdParameter>, res: Response
         res.status(200).json(controller);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
     
@@ -23,7 +34,18 @@ export const createController = async (req: Request<IdParameter>, res: Response)
         res.status(201).json(success);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
     
@@ -34,7 +56,18 @@ export const deleteController = async (req: Request<IdParameter>, res: Response)
         res.status(200).json(success);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
 
@@ -58,6 +91,17 @@ export const updateController = async (req: Request<IdParameter, object, Control
         res.status(200).json(success);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+        
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }

@@ -12,7 +12,18 @@ export const getEventById = async (req: Request<IdParameter>, res: Response) => 
         res.status(200).json(event);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
 
@@ -23,7 +34,18 @@ export const getEventsHostedByUserById = async (req: Request<IdParameter>, res: 
         res.status(200).json(events);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+        
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
 
@@ -34,7 +56,18 @@ export const createEvent = async (req: Request<EventCreateParameter>, res: Respo
         res.status(200).json(success);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+        
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
 
@@ -45,7 +78,18 @@ export const deleteEvent = async (req: Request<IdParameter>, res: Response) => {
         res.status(200).json(success);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+        
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
 
@@ -71,6 +115,17 @@ export const updateEvent = async (req: Request<IdParameter, object, EventUpdateP
         res.status(200).json(success);
     } catch (e) {
         console.error(e);
-        res.status(500).json(e);
+        
+        if (e instanceof Error) {
+            res.status(500).json({
+                error: e.name,
+                message: e.message
+            });
+        } else {
+            res.status(500).json({
+                error: "UnknownError",
+                message: "Something went wrong"
+            });
+        }
     }
 }
