@@ -3,6 +3,8 @@ import { EventControllerAttendeeRepository } from "../infrastructure/repositorie
 import { AirportService } from "./AirportService";
 import { ControllerPositionService } from "./ControllerPositionService";
 import { UserService } from "./UserService";
+import { EventService } from "./EventService";
+import { ControllerService } from "./ControllerService";
 
 export class EventControllerAttendeeService {
     private static instance?: EventControllerAttendeeService;
@@ -19,8 +21,10 @@ export class EventControllerAttendeeService {
     
     private ecaRepo: EventControllerAttendeeRepository = EventControllerAttendeeRepository.getInstance();
     private userService: UserService = UserService.getInstance();
+    private controllerService: ControllerService = ControllerService.getInstance();
     private airportService: AirportService = AirportService.getInstance();
     private positionService: ControllerPositionService = ControllerPositionService.getInstance();
+    private eventService: EventService = EventService.getInstance();
 
     public async getController(eventId: number, userId: number) {
         return await this.ecaRepo.getController(eventId, userId);
@@ -41,6 +45,11 @@ export class EventControllerAttendeeService {
             throw Error("Controller Assignment already exists for this event");
         }
 
+        const eventExists = await this.eventService.exists(eventId);
+        if (!eventExists) {
+            throw Error("Event not found");
+        }
+
         const userExists = await this.userService.existsById(userId);
         if (!userExists) {
             throw Error("User not found");
@@ -59,6 +68,22 @@ export class EventControllerAttendeeService {
         const positionExists = await this.positionService.exists(positionId);
         if (!positionExists) {
             throw Error("Position not found");
+        }
+
+        const controllerHasQualification = await this.controllerService.getByUserId(userId).then(controller => {
+            if (!controller) {
+                throw Error("Controller not found when looking up qualifications");
+            }
+
+            if (controller.qualification.id < positionId) {
+                return false;
+            }
+
+            return true;
+        });
+
+        if (!controllerHasQualification) {
+            throw Error("Controller does not have the required qualification for this position");
         }
 
         return await this.ecaRepo.createControllerAssignment(eventId, userId, airportId, positionId);
