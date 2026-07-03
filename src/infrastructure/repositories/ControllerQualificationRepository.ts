@@ -1,4 +1,4 @@
-import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { RowDataPacket } from "mysql2";
 import { pool } from "../../config/config";
 import { IControllerPosition } from "../models/IControllerPosition";
 import { IControllerQualificationRepository } from "./IControllerQualificationRepository";
@@ -31,21 +31,5 @@ export class ControllerQualificationRepository implements IControllerQualificati
         };
 
         return position;
-    }
-
-    public async update(userId: number, positionId: number): Promise<boolean> {
-        const sql = `
-            UPDATE controllerqualification
-            SET position_id = ?
-            WHERE user_id = ?
-        `;
-
-        const [result] = await pool.execute<ResultSetHeader>(
-            sql,
-            [positionId, userId]
-        );
-
-        if (result.affectedRows > 0) return true;
-        else return false;
     }
 }

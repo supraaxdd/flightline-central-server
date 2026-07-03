@@ -89,35 +89,57 @@ export class EventControllerAttendeeRepository implements IEventControllerAttend
         return eventController;
     }
 
-    public async createControllerAssignment(eventId: number, userId: number, airportId: number, positionId: number): Promise<boolean> {
+    public async controllerAssignmentExists(
+        eventId: number,
+        userId: number
+    ): Promise<boolean> {
+        const sql = `
+            SELECT 1 FROM eventcontrollerattendee
+            WHERE event_id = ?
+            AND user_id = ?
+        `;
+
+        const [rows] = await pool.execute<RowDataPacket[]>(
+            sql,
+            [eventId, userId]
+        );
+
+        return rows.length > 0;
+    }
+
+    public async createControllerAssignment(
+        eventId: number,
+        userId: number,
+        airportId: number,
+        positionId: number
+    ): Promise<void> {
         const sql = `
             INSERT INTO eventcontrollerattendee (event_id, user_id, airport_id, position_id) VALUES (?, ?, ?, ?);
         `;
 
-        const [result] = await pool.execute<ResultSetHeader>(
+        await pool.execute<ResultSetHeader>(
             sql,
             [eventId, userId, airportId, positionId]
         );
-        
-        if (result.affectedRows > 0) return true;
-        else return false;
     }
 
-    public async updateControllerAssignment(eventId: number, userId: number, change: IEventControllerAttendeeUpdateDto): Promise<boolean> {
+    public async updateControllerAssignment(
+        eventId: number,
+        userId: number,
+        change: IEventControllerAttendeeUpdateDto
+    ): Promise<void> {
         const fields = [];
         const values = [];
 
         if (
             change.airportId === undefined &&
             change.positionId === undefined
-        ) return false;
+        ) return;
 
         const conn = await pool.getConnection();
 
         try {
             await conn.beginTransaction();
-
-            let updated = false;
 
             if (change.airportId !== undefined) {
                 fields.push('airport_id = ?');
@@ -139,12 +161,10 @@ export class EventControllerAttendeeRepository implements IEventControllerAttend
                 
                 values.push(eventId, userId);
 
-                const [result] = await conn.execute<ResultSetHeader>(sql, values);
-                if (result.affectedRows > 0) updated = true;
+                await conn.execute<ResultSetHeader>(sql, values);
             }
 
             await conn.commit();
-            return updated;
         } catch (e) {
             await conn.rollback();
             throw e;
@@ -153,19 +173,19 @@ export class EventControllerAttendeeRepository implements IEventControllerAttend
         }
     }
 
-    public async deleteControllerAssignment(eventId: number, userId: number): Promise<boolean> {
+    public async deleteControllerAssignment(
+        eventId: number,
+        userId: number
+    ): Promise<void> {
         const sql = `
             DELETE FROM eventcontrollerattendee
             WHERE event_id = ?
             AND user_id = ?
         `;
 
-        const [result] = await pool.execute<ResultSetHeader>(
+        await pool.execute<ResultSetHeader>(
             sql,
             [eventId, userId]
         );
-
-        if (result.affectedRows > 0) return true;
-        else return false;
     }
 }

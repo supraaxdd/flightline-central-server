@@ -191,56 +191,62 @@ export class EventRepository implements IEventRepository {
         return events;
     }
 
+    public async exists(id: number): Promise<boolean> {
+        const sql = `
+            SELECT 1 FROM event WHERE id = ?
+        `;
+
+        const [rows] = await pool.execute<RowDataPacket[]>(
+            sql,
+            [id]
+        );
+
+        return rows.length > 0;
+    }
+
     public async create(
         userId: number,
         dateHosted: Date
-    ): Promise<boolean> {
+    ): Promise<void> {
         const sql = `
             INSERT INTO event (host_id, date_hosted)
             VALUES (?, ?)
         `;
 
-        const [result] = await pool.execute<ResultSetHeader>(
+        await pool.execute<ResultSetHeader>(
             sql,
             [userId, dateHosted]
         );
-
-        return result.affectedRows > 0;
     }
 
-    public async delete(id: number): Promise<boolean> {
+    public async delete(id: number): Promise<void> {
         const sql = `
             DELETE FROM event
             WHERE id = ?
         `;
 
-        const [result] = await pool.execute<ResultSetHeader>(
+        await pool.execute<ResultSetHeader>(
             sql,
             [id]
         );
-
-        if (result.affectedRows > 0) return true;
-        else return false;
     }
 
     public async update(
         id: number,
         change: IEventUpdateDto
-    ): Promise<boolean> {
+    ): Promise<void> {
         const fields = [];
         const values = [];
 
         if (
             change.hostId === undefined &&
             change.dateHosted === undefined
-        ) return false;
+        ) return;
 
         const conn = await pool.getConnection();
 
         try {
             await conn.beginTransaction();
-
-            let updated = false;
 
             if (change.hostId !== undefined) {
                 fields.push('host_id = ?');
@@ -261,12 +267,10 @@ export class EventRepository implements IEventRepository {
 
                 values.push(id);
 
-                const [result] = await conn.execute<ResultSetHeader>(sql, values);
-                if (result.affectedRows > 0) updated = true;
+                await conn.execute<ResultSetHeader>(sql, values);
             }
 
             await conn.commit();
-            return updated;
         } catch (e) {
             await conn.rollback();
             throw e;
