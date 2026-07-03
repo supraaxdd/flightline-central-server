@@ -1,4 +1,5 @@
 import { IEventControllerAttendeeUpdateDto } from "../infrastructure/dtos/IEventControllerAttendeeUpdateDto";
+import { ConflictError, ErrorCode, ForbiddenError, NotFoundError } from "../infrastructure/errors";
 import { EventControllerAttendeeRepository } from "../infrastructure/repositories/EventControllerAttendeeRepository";
 import { AirportService } from "./AirportService";
 import { ControllerPositionService } from "./ControllerPositionService";
@@ -43,42 +44,54 @@ export class EventControllerAttendeeService {
     ) {
         const exists = await this.controllerAssignmentExists(eventId, userId);
         if (exists) {
-            throw Error("Controller Assignment already exists for this event");
+            throw new ConflictError(
+                ErrorCode.CONTROLLER_ASSIGNMENT_ALREADY_EXISTS,
+                "Controller Assignment already exists for this event",
+                { eventId, userId }
+            );
         }
 
         const eventExists = await this.eventService.exists(eventId);
         if (!eventExists) {
-            throw Error("Event not found");
+            throw new NotFoundError(ErrorCode.EVENT_NOT_FOUND, "Event not found", { eventId });
         }
 
         const userExists = await this.userService.existsById(userId);
         if (!userExists) {
-            throw Error("User not found");
+            throw new NotFoundError(ErrorCode.USER_NOT_FOUND, "User not found", { userId });
         }
 
         const userRoles = await this.userService.getRoles(userId);
         if (!userRoles?.find(r => r.name === UserRole.CONTROLLER)) {
-            throw Error("User does not have permission to be a controller");
+            throw new ForbiddenError(
+                ErrorCode.INSUFFICIENT_ROLE,
+                "User does not have permission to be a controller",
+                { userId, requiredRole: UserRole.CONTROLLER }
+            );
         }
 
         const airportExists = await this.airportService.exists(airportId);
         if (!airportExists) {
-            throw Error("Airport not found");
+            throw new NotFoundError(ErrorCode.AIRPORT_NOT_FOUND, "Airport not found", { airportId });
         }
 
         const positionExists = await this.positionService.exists(positionId);
         if (!positionExists) {
-            throw Error("Position not found");
+            throw new NotFoundError(ErrorCode.POSITION_NOT_FOUND, "Position not found", { positionId });
         }
 
         // Checking if controller exists before checking for their qualifications
         const controller = await this.controllerService.getByUserId(userId);
         if (controller === null) {
-            throw Error("Controller not found");
+            throw new NotFoundError(ErrorCode.CONTROLLER_NOT_FOUND, "Controller not found", { userId });
         }
 
         if (controller.qualification.id < positionId) {
-            throw Error("Controller does not have the required qualification for this position");
+            throw new ForbiddenError(
+                ErrorCode.INSUFFICIENT_QUALIFICATION,
+                "Controller does not have the required qualification for this position",
+                { userId, positionId, qualificationId: controller.qualification.id }
+            );
         }
 
         return await this.ecaRepo.createControllerAssignment(eventId, userId, airportId, positionId);
@@ -91,7 +104,11 @@ export class EventControllerAttendeeService {
     ) {
         const exists = await this.controllerAssignmentExists(eventId, userId);
         if (!exists) {
-            throw Error("Controller Assignment not found");
+            throw new NotFoundError(
+                ErrorCode.CONTROLLER_ASSIGNMENT_NOT_FOUND,
+                "Controller Assignment not found",
+                { eventId, userId }
+            );
         };
 
         // Here we don't check if the user exists because if the assignment exists, that means that
@@ -103,14 +120,14 @@ export class EventControllerAttendeeService {
         if (change.airportId !== undefined) {
             const airportExists = await this.airportService.exists(change.airportId);
             if (!airportExists) {
-                throw Error("Airport not found");
+                throw new NotFoundError(ErrorCode.AIRPORT_NOT_FOUND, "Airport not found", { airportId: change.airportId });
             }
         }
 
         if (change.positionId !== undefined) {
             const positionExists = await this.positionService.exists(change.positionId);
             if (!positionExists) {
-                throw Error("Position not found");
+                throw new NotFoundError(ErrorCode.POSITION_NOT_FOUND, "Position not found", { positionId: change.positionId });
             }
         }
         
@@ -123,7 +140,11 @@ export class EventControllerAttendeeService {
     ) {
         const exists = await this.controllerAssignmentExists(eventId, userId);
         if (!exists) {
-            throw Error("Controller Assignment not found");
+            throw new NotFoundError(
+                ErrorCode.CONTROLLER_ASSIGNMENT_NOT_FOUND,
+                "Controller Assignment not found",
+                { eventId, userId }
+            );
         }
 
         return await this.ecaRepo.deleteControllerAssignment(eventId, userId);

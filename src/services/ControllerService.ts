@@ -1,4 +1,5 @@
 import { IControllerUpdateDto } from "../infrastructure/dtos/IControllerUpdateDto";
+import { ConflictError, ErrorCode, NotFoundError } from "../infrastructure/errors";
 import { ControllerRepository } from "../infrastructure/repositories/ControllerRepository";
 import { UserService } from "./UserService";
 
@@ -28,14 +29,13 @@ export class ControllerService {
 
     public async createController(id: number) {
         const controllerExists = await this.existsByUserId(id);
-        // Future implementation of the error class story... ref. User/Event services for more in depth explanations
         if (controllerExists) {
-            throw Error("Controller already exists");
+            throw new ConflictError(ErrorCode.CONTROLLER_ALREADY_EXISTS, "Controller already exists", { userId: id });
         }
 
         const userExists = await this.userService.existsById(id);
         if (!userExists) {
-            throw Error("User not found to become a controller");
+            throw new NotFoundError(ErrorCode.USER_NOT_FOUND, "User not found to become a controller", { userId: id });
         }
 
         return await this.controllerRepo.create(id, new Date());
@@ -43,9 +43,8 @@ export class ControllerService {
 
     public async deleteController(id: number) {
         const exists = await this.existsByUserId(id);
-        // Future implementation of the error class story... ref. User/Event services for more in depth explanations
         if (!exists) {
-            throw Error("Controller not found")
+            throw new NotFoundError(ErrorCode.CONTROLLER_NOT_FOUND, "Controller not found", { userId: id });
         }
 
         return await this.controllerRepo.delete(id);
@@ -56,12 +55,10 @@ export class ControllerService {
         controllerChange: IControllerUpdateDto
     ) {
         const exists = await this.existsByUserId(id);
-        // Future implementation of the error class story... ref. User/Event services for more in depth explanations
         if (!exists) {
-            throw Error("Controller not found");
+            throw new NotFoundError(ErrorCode.CONTROLLER_NOT_FOUND, "Controller not found", { userId: id });
         }
 
         return await this.controllerRepo.update(id, controllerChange);
     }
 }
-
