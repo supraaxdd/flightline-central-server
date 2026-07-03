@@ -1,6 +1,7 @@
 import { IEventUpdateDto } from "../infrastructure/dtos/IEventUpdateDto";
 import { EventRepository } from "../infrastructure/repositories/EventRepository";
 import { UserService } from "./UserService";
+import { UserRole } from "../infrastructure/enums/UserRole";
 
 export class EventService {
     private static instance?: EventService;
@@ -40,7 +41,7 @@ export class EventService {
         }
 
         const userRoles = await this.userService.getRoles(hostId);
-        if (!userRoles?.find(r => r.name === "Event Host")) {
+        if (!userRoles?.find(r => r.name === UserRole.EVENT_HOST)) {
             throw Error("Host user does not have permission to host events");
         }
 
@@ -72,7 +73,7 @@ export class EventService {
             }
 
             const userRoles = await this.userService.getRoles(update.hostId);
-            if (!userRoles?.find(r => r.name === "Event Host")) {
+            if (!userRoles?.find(r => r.name === UserRole.EVENT_HOST)) {
                 throw Error("Host user does not have permission to host events");
             }
         }

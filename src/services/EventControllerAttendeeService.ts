@@ -5,6 +5,7 @@ import { ControllerPositionService } from "./ControllerPositionService";
 import { UserService } from "./UserService";
 import { EventService } from "./EventService";
 import { ControllerService } from "./ControllerService";
+import { UserRole } from "../infrastructure/enums/UserRole";
 
 export class EventControllerAttendeeService {
     private static instance?: EventControllerAttendeeService;
@@ -56,7 +57,7 @@ export class EventControllerAttendeeService {
         }
 
         const userRoles = await this.userService.getRoles(userId);
-        if (!userRoles?.find(r => r.name === "Controller")) {
+        if (!userRoles?.find(r => r.name === UserRole.CONTROLLER)) {
             throw Error("User does not have permission to be a controller");
         }
 
@@ -70,19 +71,13 @@ export class EventControllerAttendeeService {
             throw Error("Position not found");
         }
 
-        const controllerHasQualification = await this.controllerService.getByUserId(userId).then(controller => {
-            if (!controller) {
-                throw Error("Controller not found when looking up qualifications");
-            }
+        // Checking if controller exists before checking for their qualifications
+        const controller = await this.controllerService.getByUserId(userId);
+        if (controller === null) {
+            throw Error("Controller not found");
+        }
 
-            if (controller.qualification.id < positionId) {
-                return false;
-            }
-
-            return true;
-        });
-
-        if (!controllerHasQualification) {
+        if (controller.qualification.id < positionId) {
             throw Error("Controller does not have the required qualification for this position");
         }
 
