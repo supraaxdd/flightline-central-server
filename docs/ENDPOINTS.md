@@ -24,6 +24,12 @@ Reference for all HTTP routes exposed by the Flightline Central Server, includin
 
 Read endpoints (`getUserById`, `getEventById`, etc.) currently return `200` with `null` when a record is not found — they do **not** throw `NotFoundError`. Only mutating endpoints enforce typed errors today.
 
+### Request parameters
+
+- **Path parameters** are required segments in the URL (e.g. `:id`).
+- **Body parameters** apply to `PUT` requests and must be sent as JSON (`Content-Type: application/json`).
+- For **update** endpoints (`PUT`), the resource identifier is always in the path. Individual body fields are optional, but **at least one body field should be provided** for the request to perform a meaningful update. The API does not currently reject an empty body.
+
 ---
 
 ## Users
@@ -40,6 +46,59 @@ Read endpoints (`getUserById`, `getEventById`, etc.) currently return `200` with
 | POST | `/api/users/:discordId/:username` | createUser | `201` — created user |
 | DELETE | `/api/users/:id` | deleteUser | `200` — delete result |
 | PUT | `/api/users/:id` | updateUser | `200` — update result |
+
+### Parameters
+
+#### GET `/api/users/getById/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | User id |
+
+#### GET `/api/users/getByDiscordId/:discordId`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `discordId` | string | Yes | Discord user id |
+
+#### GET `/api/users/getByUsername/:username`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `username` | string | Yes | Username |
+
+#### GET `/api/users/getRoles/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | User id |
+
+#### POST `/api/users/:discordId/:username`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `discordId` | string | Yes | Discord user id for the new user |
+| Path | `username` | string | Yes | Username for the new user |
+
+No request body.
+
+#### DELETE `/api/users/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | User id |
+
+No request body.
+
+#### PUT `/api/users/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | User id |
+| Body | `discordId` | string | No | New Discord user id |
+| Body | `username` | string | No | New username |
+
+At least one body field (`discordId` or `username`) should be provided.
 
 ### Errors
 
@@ -83,6 +142,40 @@ Read endpoints (`getUserById`, `getEventById`, etc.) currently return `200` with
 | DELETE | `/api/controllers/:id` | deleteController | `200` — delete result |
 | PUT | `/api/controllers/:id` | updateController | `200` — update result |
 
+### Parameters
+
+#### GET `/api/controllers/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | User id (controller is keyed by user id) |
+
+#### POST `/api/controllers/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | User id to create a controller profile for |
+
+No request body.
+
+#### DELETE `/api/controllers/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | User id (controller is keyed by user id) |
+
+No request body.
+
+#### PUT `/api/controllers/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | User id (controller is keyed by user id) |
+| Body | `controllerSince` | Date (ISO 8601 string) | No | Date the user became a controller |
+| Body | `qualificationPositionId` | number | No | Id of the controller's qualification position |
+
+At least one body field (`controllerSince` or `qualificationPositionId`) should be provided.
+
 ### Errors
 
 **Source:** [`src/services/ControllerService.ts`](../src/services/ControllerService.ts)
@@ -123,6 +216,47 @@ All controller errors include `details: { userId }` where `userId` is the `:id` 
 | PUT | `/api/events/:id` | updateEvent | `200` — update result |
 | DELETE | `/api/events/:id` | deleteEvent | `200` — delete result |
 
+### Parameters
+
+#### GET `/api/events/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | Event id |
+
+#### GET `/api/events/getEventsHostedByUserById/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | Host user id |
+
+#### POST `/api/events/:hostId/:dateHosted`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `hostId` | number | Yes | User id of the event host |
+| Path | `dateHosted` | Date (ISO 8601 string) | Yes | Date the event is hosted |
+
+No request body.
+
+#### DELETE `/api/events/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | Event id |
+
+No request body.
+
+#### PUT `/api/events/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | Event id |
+| Body | `hostId` | number | No | New host user id |
+| Body | `dateHosted` | Date (ISO 8601 string) | No | New event date |
+
+At least one body field (`hostId` or `dateHosted`) should be provided.
+
 ### Errors
 
 **Source:** [`src/services/EventService.ts`](../src/services/EventService.ts)
@@ -161,6 +295,46 @@ All controller errors include `details: { userId }` where `userId` is the `:id` 
 | POST | `/api/eca/:eventId/:userId/:airportId/:positionId` | createControllerAssignment | `200` — create result |
 | PUT | `/api/eca/:eventId/:userId` | updateControllerAssignment | `200` — update result |
 | DELETE | `/api/eca/:eventId/:userId` | deleteControllerAssignment | `200` — delete result |
+
+### Parameters
+
+#### GET `/api/eca/:eventId/:userId`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `eventId` | number | Yes | Event id |
+| Path | `userId` | number | Yes | User id (controller attendee) |
+
+#### POST `/api/eca/:eventId/:userId/:airportId/:positionId`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `eventId` | number | Yes | Event id |
+| Path | `userId` | number | Yes | User id (controller to assign) |
+| Path | `airportId` | number | Yes | Airport id for the assignment |
+| Path | `positionId` | number | Yes | Controller position id for the assignment |
+
+No request body.
+
+#### DELETE `/api/eca/:eventId/:userId`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `eventId` | number | Yes | Event id |
+| Path | `userId` | number | Yes | User id (controller attendee) |
+
+No request body.
+
+#### PUT `/api/eca/:eventId/:userId`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `eventId` | number | Yes | Event id |
+| Path | `userId` | number | Yes | User id (controller attendee) |
+| Body | `airportId` | number | No | New airport id for the assignment |
+| Body | `positionId` | number | No | New controller position id for the assignment |
+
+At least one body field (`airportId` or `positionId`) should be provided. The user id cannot be changed via this endpoint (it is part of the assignment's composite key).
 
 ### Errors
 
@@ -218,4 +392,4 @@ All controller errors include `details: { userId }` where `userId` is the `:id` 
 
 ## Maintenance
 
-Update this file whenever routes or service-layer throws change. Future unit tests can cross-check error codes programmatically; this document remains the human and Postman reference for expected API responses.
+Update this file whenever routes, request parameters, or service-layer throws change. Future unit tests can cross-check error codes programmatically; this document remains the human and Postman reference for expected API responses.
