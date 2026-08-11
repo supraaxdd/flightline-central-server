@@ -1,4 +1,5 @@
 import { IEventUpdateDto } from "../infrastructure/dtos/IEventUpdateDto";
+import { ErrorCode, ForbiddenError, NotFoundError } from "../infrastructure/errors";
 import { EventRepository } from "../infrastructure/repositories/EventRepository";
 import { UserService } from "./UserService";
 import { UserRole } from "../infrastructure/enums/UserRole";
@@ -37,12 +38,12 @@ export class EventService {
     ) {
         const userExists = await this.userService.existsById(hostId);
         if (!userExists) {
-            throw Error("Host User not found");
+            throw new NotFoundError(ErrorCode.USER_NOT_FOUND, "Host User not found", { userId: hostId });
         }
 
         const userRoles = await this.userService.getRoles(hostId);
         if (!userRoles?.find(r => r.name === UserRole.EVENT_HOST)) {
-            throw Error("Host user does not have permission to host events");
+            throw new ForbiddenError(ErrorCode.INSUFFICIENT_ROLE, "Host user does not have permission to host events", { userId: hostId, requiredRole: UserRole.EVENT_HOST });
         }
 
         return await this.eventRepo.create(hostId, dateHosted);
@@ -51,7 +52,7 @@ export class EventService {
     public async deleteEvent(id: number) {
         const exists = await this.exists(id);
         if (!exists) {
-            throw Error("Event not found");
+            throw new NotFoundError(ErrorCode.EVENT_NOT_FOUND, "Event not found", { eventId: id });
         }
 
         return await this.eventRepo.delete(id);
@@ -63,18 +64,18 @@ export class EventService {
     ) {
         const exists = await this.exists(eventId);
         if (!exists) {
-            throw Error("Event not found");
+            throw new NotFoundError(ErrorCode.EVENT_NOT_FOUND, "Event not found", { eventId });
         }
 
         if (update.hostId !== undefined) {
             const userExists = await this.userService.existsById(update.hostId);
             if (!userExists) {
-                throw Error("Host user not found");
+                throw new NotFoundError(ErrorCode.USER_NOT_FOUND, "Host user not found", { userId: update.hostId });
             }
 
             const userRoles = await this.userService.getRoles(update.hostId);
             if (!userRoles?.find(r => r.name === UserRole.EVENT_HOST)) {
-                throw Error("Host user does not have permission to host events");
+                throw new ForbiddenError(ErrorCode.INSUFFICIENT_ROLE, "Host user does not have permission to host events", { userId: update.hostId, requiredRole: UserRole.EVENT_HOST });
             }
         }
 

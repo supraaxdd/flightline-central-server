@@ -1,4 +1,5 @@
 import { IUserUpdateDto } from "../infrastructure/dtos/IUserUpdateDto";
+import { ConflictError, ErrorCode, NotFoundError } from "../infrastructure/errors";
 import { UserRepository } from "../infrastructure/repositories/UserRepository"
 
 export class UserService {
@@ -29,10 +30,9 @@ export class UserService {
 	}
 	
 	public async getRoles(id: number) {
-		// Here, the error is generic. Should be changed with the Error class story
 		const exists = await this.existsById(id);
 		if (!exists) {
-			throw Error("User not found");
+			throw new NotFoundError(ErrorCode.USER_NOT_FOUND, "User not found", { userId: id });
 		}
 
 		return await this.userRepo.getRoles(id);
@@ -48,10 +48,9 @@ export class UserService {
 	
 	public async deleteUser(id: number) {
 		const exists = await this.existsById(id);
-		
-		// This should be changed during the error class implementation story, and have the API either return a 404 or 204 status code.
+
 		if (!exists) {
-			throw new Error("User not found");
+			throw new NotFoundError(ErrorCode.USER_NOT_FOUND, "User not found", { userId: id });
 		};
 
 		return await this.userRepo.delete(id);
@@ -62,12 +61,9 @@ export class UserService {
 		username: string
 	) {
 		const exists = await this.existsByDiscordId(discordId);
-		
-		// This should be changed to throw an error if a user already exists which would be handled in the upper layers of the appliation.
-		// Ideally, if a user already exists, send a 202 (Accepted), 403 (Forbidden), and maybe 409 (Conflict) but for the purpose of security
-		// I don't think that 409 should be used 
+
 		if (exists) {
-			throw new Error("User already exists");
+			throw new ConflictError(ErrorCode.USER_ALREADY_EXISTS, "User already exists");
 		}
 
 		return await this.userRepo.create(discordId, username);
@@ -79,10 +75,8 @@ export class UserService {
 	) {
 		const exists = await this.existsById(id);
 
-		// Again, an custom error should be thrown here. The status code is up to the discretion of whoever
-		// is implementing the error class story
 		if (!exists) {
-			throw new Error("User not found");
+			throw new NotFoundError(ErrorCode.USER_NOT_FOUND, "User not found", { userId: id });
 		};
 
 		return await this.userRepo.update(id, change);

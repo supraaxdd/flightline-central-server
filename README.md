@@ -55,6 +55,10 @@ Run the server using
 npm start
 ```
 
+## Documentation
+
+- [API Endpoints & Errors](docs/ENDPOINTS.md) — route reference with success and error responses
+
 ## Contributors
 - supraaxdd
 - Blinkzy
