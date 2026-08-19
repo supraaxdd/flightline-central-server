@@ -1,3 +1,4 @@
+import { ErrorCode, NotFoundError } from "../infrastructure/errors";
 import { AirportRepository } from "../infrastructure/repositories/AirportRepository";
 
 export class AirportService {
@@ -22,7 +23,30 @@ export class AirportService {
 		return await this.airportRepo.getByName(name);
 	}
 
+	public async getAll() {
+		return await this.airportRepo.getAll();
+	}
+
 	public async exists(id: number) {
 		return await this.airportRepo.exists(id);
+	}
+
+	public async resolveAirport(identifier: string) {
+		const asNumber = Number(identifier);
+		if (!Number.isNaN(asNumber) && Number.isInteger(asNumber)) {
+			const byId = await this.getById(asNumber);
+			if (byId) return byId;
+		}
+
+		return await this.getByName(identifier);
+	}
+
+	public async resolveAirportOrThrow(identifier: string) {
+		const airport = await this.resolveAirport(identifier);
+		if (!airport) {
+			throw new NotFoundError(ErrorCode.AIRPORT_NOT_FOUND, "Airport not found", { airport: identifier });
+		}
+
+		return airport;
 	}
 }

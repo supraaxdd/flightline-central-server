@@ -94,6 +94,7 @@ export class EventRepository implements IEventRepository {
                 roles: []
             },
             dateHosted: eventData.date_hosted,
+            active: eventData.active,
             controllers: []
         }
 
@@ -191,6 +192,35 @@ export class EventRepository implements IEventRepository {
         return events;
     }
 
+    public async getActiveEvents(): Promise<IEventSummaryDto[] | null> {
+        const sql = `
+            SELECT
+                e.id,
+                e.date_hosted,
+                COUNT(eca.user_id) AS controller_count
+            FROM event e
+            LEFT JOIN eventcontrollerattendee eca ON eca.event_id = e.id
+            WHERE e.active = 1
+            GROUP BY e.id;
+        `;
+
+        const [rows] = await pool.execute<RowDataPacket[]>(sql);
+
+        if (rows.length === 0) return null;
+
+        const events: IEventSummaryDto[] = [];
+
+        for (const row of rows) {
+            events.push({
+                id: row.id,
+                dateHosted: row.date_hosted,
+                controllerCount: row.controller_count
+            });
+        }
+
+        return events;
+    }
+
     public async exists(id: number): Promise<boolean> {
         const sql = `
             SELECT 1 FROM event WHERE id = ?
@@ -240,7 +270,8 @@ export class EventRepository implements IEventRepository {
 
         if (
             change.hostId === undefined &&
-            change.dateHosted === undefined
+            change.dateHosted === undefined &&
+            change.active === undefined
         ) return;
 
         const conn = await pool.getConnection();
@@ -256,6 +287,11 @@ export class EventRepository implements IEventRepository {
             if (change.dateHosted !== undefined) {
                 fields.push('date_hosted = ?');
                 values.push(change.dateHosted);
+            }
+
+            if (change.active !== undefined) {
+                fields.push('active = ?');
+                values.push(change.active ? 1 : 0);
             }
 
             if (fields.length > 0) {

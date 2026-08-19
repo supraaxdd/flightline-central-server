@@ -1,3 +1,4 @@
+import { ErrorCode, NotFoundError } from "../infrastructure/errors";
 import { ControllerPositionRepository } from "../infrastructure/repositories/ControllerPositionRepository";
 
 export class ControllerPositionService {
@@ -22,7 +23,30 @@ export class ControllerPositionService {
 		return await this.positionRepo.getByName(name);
 	}
 
+	public async getAll() {
+		return await this.positionRepo.getAll();
+	}
+
 	public async exists(id: number) {
 		return await this.positionRepo.exists(id);
+	}
+
+	public async resolvePosition(identifier: string) {
+		const asNumber = Number(identifier);
+		if (!Number.isNaN(asNumber) && Number.isInteger(asNumber)) {
+			const byId = await this.getById(asNumber);
+			if (byId) return byId;
+		}
+
+		return await this.getByName(identifier);
+	}
+
+	public async resolvePositionOrThrow(identifier: string) {
+		const position = await this.resolvePosition(identifier);
+		if (!position) {
+			throw new NotFoundError(ErrorCode.POSITION_NOT_FOUND, "Position not found", { position: identifier });
+		}
+
+		return position;
 	}
 }

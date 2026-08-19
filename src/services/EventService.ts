@@ -28,6 +28,10 @@ export class EventService {
         return await this.eventRepo.getEventsHostedByUserById(userId);
     }
 
+    public async getActiveEvents() {
+        return await this.eventRepo.getActiveEvents();
+    }
+
     public async exists(id: number) {
         return await this.eventRepo.exists(id);
     }

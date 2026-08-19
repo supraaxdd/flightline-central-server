@@ -4,7 +4,7 @@ import { getController, updateControllerAssignment, createControllerAssignment, 
 const router = Router();
 
 router.get('/:eventId/:userId', getController);
-router.post('/:eventId/:userId/:airportId/:positionId', createControllerAssignment);
+router.post('/:eventId/:userId/:airport/:position', createControllerAssignment);
 router.put('/:eventId/:userId', updateControllerAssignment);
 router.delete('/:eventId/:userId', deleteControllerAssignment);
 

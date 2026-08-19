@@ -42,7 +42,7 @@ export class ControllerPositionRepository implements IControllerPositionReposito
 	public async getByName(name: string): Promise<IControllerPosition | null> {
 		const sql = `
 			SELECT * FROM controllerposition
-			WHERE id = ?
+			WHERE name = ?
 		`;
 
 		const [rows] = await pool.execute<RowDataPacket[]>(
@@ -60,6 +60,20 @@ export class ControllerPositionRepository implements IControllerPositionReposito
 			id: data.id,
 			name: data.name
 		} 
+	}
+
+	public async getAll(): Promise<IControllerPosition[]> {
+		const sql = `
+			SELECT * FROM controllerposition
+			ORDER BY id
+		`;
+
+		const [rows] = await pool.execute<RowDataPacket[]>(sql);
+
+		return rows.map(row => ({
+			id: row.id,
+			name: row.name
+		}));
 	}
 
 	public async exists(id: number): Promise<boolean> {

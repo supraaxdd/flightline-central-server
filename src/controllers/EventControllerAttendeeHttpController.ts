@@ -12,15 +12,15 @@ export const getController = async (req: Request<EventControllerAttendeeIdParame
 }
 
 export const createControllerAssignment = async (req: Request<EventControllerAttendeeCreationParameter>, res: Response) => {
-    const { eventId, userId, airportId, positionId } = req.params;
+    const { eventId, userId, airport, position } = req.params;
 
-    const success = await ecaService.createControllerAssignment(eventId, userId, airportId, positionId);
+    const success = await ecaService.createControllerAssignment(eventId, userId, airport, position);
     res.status(200).json(success);
 }
 
 export const updateControllerAssignment = async (req: Request<EventControllerAttendeeIdParameter, object, EventControllerAttendeeUpdateParameter>, res: Response) => {
     const { eventId, userId } = req.params;
-    const { airportId, positionId } = req.body;
+    const { airportId, positionId, airport, position } = req.body;
 
     const updateDto: IEventControllerAttendeeUpdateDto = {};
 
@@ -30,6 +30,14 @@ export const updateControllerAssignment = async (req: Request<EventControllerAtt
 
     if (positionId !== undefined) {
         updateDto.positionId = positionId;
+    }
+
+    if (airport !== undefined) {
+        updateDto.airport = airport;
+    }
+
+    if (position !== undefined) {
+        updateDto.position = position;
     }
 
     const success = await ecaService.updateControllerAssignment(eventId, userId, updateDto);

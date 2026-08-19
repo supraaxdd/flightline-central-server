@@ -210,6 +210,7 @@ All controller errors include `details: { userId }` where `userId` is the `:id` 
 
 | Method | Path | Handler | Success |
 |--------|------|---------|---------|
+| GET | `/api/events/active` | getActiveEvents | `200` — events array or `null` |
 | GET | `/api/events/:id` | getEventById | `200` — event object or `null` |
 | GET | `/api/events/getEventsHostedByUserById/:id` | getEventsHostedByUserById | `200` — events array or `null` |
 | POST | `/api/events/:hostId/:dateHosted` | createEvent | `200` — create result |
@@ -217,6 +218,10 @@ All controller errors include `details: { userId }` where `userId` is the `:id` 
 | DELETE | `/api/events/:id` | deleteEvent | `200` — delete result |
 
 ### Parameters
+
+#### GET `/api/events/active`
+
+No path or body parameters. Returns all events where `active = 1` as an array of `{ id, dateHosted, controllerCount }`, or `null` if none.
 
 #### GET `/api/events/:id`
 
@@ -254,8 +259,9 @@ No request body.
 | Path | `id` | number | Yes | Event id |
 | Body | `hostId` | number | No | New host user id |
 | Body | `dateHosted` | Date (ISO 8601 string) | No | New event date |
+| Body | `active` | boolean | No | Whether the event is active |
 
-At least one body field (`hostId` or `dateHosted`) should be provided.
+At least one body field (`hostId`, `dateHosted`, or `active`) should be provided.
 
 ### Errors
 
@@ -292,7 +298,7 @@ At least one body field (`hostId` or `dateHosted`) should be provided.
 | Method | Path | Handler | Success |
 |--------|------|---------|---------|
 | GET | `/api/eca/:eventId/:userId` | getController | `200` — assignment object or `null` |
-| POST | `/api/eca/:eventId/:userId/:airportId/:positionId` | createControllerAssignment | `200` — create result |
+| POST | `/api/eca/:eventId/:userId/:airport/:position` | createControllerAssignment | `200` — create result |
 | PUT | `/api/eca/:eventId/:userId` | updateControllerAssignment | `200` — update result |
 | DELETE | `/api/eca/:eventId/:userId` | deleteControllerAssignment | `200` — delete result |
 
@@ -305,16 +311,16 @@ At least one body field (`hostId` or `dateHosted`) should be provided.
 | Path | `eventId` | number | Yes | Event id |
 | Path | `userId` | number | Yes | User id (controller attendee) |
 
-#### POST `/api/eca/:eventId/:userId/:airportId/:positionId`
+#### POST `/api/eca/:eventId/:userId/:airport/:position`
 
 | Location | Name | Type | Required | Description |
 |----------|------|------|----------|-------------|
 | Path | `eventId` | number | Yes | Event id |
 | Path | `userId` | number | Yes | User id (controller to assign) |
-| Path | `airportId` | number | Yes | Airport id for the assignment |
-| Path | `positionId` | number | Yes | Controller position id for the assignment |
+| Path | `airport` | string | Yes | Airport id or ICAO name (e.g. `KJFK` or `3`) |
+| Path | `position` | string | Yes | Position id or name (e.g. `Tower` or `3`) |
 
-No request body.
+No request body. Airport and position are resolved server-side by id first, then by name.
 
 #### DELETE `/api/eca/:eventId/:userId`
 
@@ -333,14 +339,16 @@ No request body.
 | Path | `userId` | number | Yes | User id (controller attendee) |
 | Body | `airportId` | number | No | New airport id for the assignment |
 | Body | `positionId` | number | No | New controller position id for the assignment |
+| Body | `airport` | string | No | New airport id or ICAO name (takes precedence over `airportId`) |
+| Body | `position` | string | No | New position id or name (takes precedence over `positionId`) |
 
-At least one body field (`airportId` or `positionId`) should be provided. The user id cannot be changed via this endpoint (it is part of the assignment's composite key).
+At least one body field should be provided. If both `airportId` and `airport` (or `positionId` and `position`) are supplied, the string identifier wins.
 
 ### Errors
 
 **Source:** [`src/services/EventControllerAttendeeService.ts`](../src/services/EventControllerAttendeeService.ts)
 
-#### POST `/api/eca/:eventId/:userId/:airportId/:positionId`
+#### POST `/api/eca/:eventId/:userId/:airport/:position`
 
 | Status | Code | Message | Details | Condition |
 |--------|------|---------|---------|-----------|
@@ -348,8 +356,8 @@ At least one body field (`airportId` or `positionId`) should be provided. The us
 | 404 | `EVENT_NOT_FOUND` | Event not found | `{ eventId }` | Event does not exist |
 | 404 | `USER_NOT_FOUND` | User not found | `{ userId }` | User does not exist |
 | 403 | `INSUFFICIENT_ROLE` | User does not have permission to be a controller | `{ userId, requiredRole: "Controller" }` | User lacks Controller role |
-| 404 | `AIRPORT_NOT_FOUND` | Airport not found | `{ airportId }` | Airport does not exist |
-| 404 | `POSITION_NOT_FOUND` | Position not found | `{ positionId }` | Position does not exist |
+| 404 | `AIRPORT_NOT_FOUND` | Airport not found | `{ airport }` | Airport identifier could not be resolved |
+| 404 | `POSITION_NOT_FOUND` | Position not found | `{ position }` | Position identifier could not be resolved |
 | 404 | `CONTROLLER_NOT_FOUND` | Controller not found | `{ userId }` | User has no controller profile |
 | 403 | `INSUFFICIENT_QUALIFICATION` | Controller does not have the required qualification for this position | `{ userId, positionId, qualificationId }` | Controller qualification is below required position |
 
@@ -358,14 +366,91 @@ At least one body field (`airportId` or `positionId`) should be provided. The us
 | Status | Code | Message | Details | Condition |
 |--------|------|---------|---------|-----------|
 | 404 | `CONTROLLER_ASSIGNMENT_NOT_FOUND` | Controller Assignment not found | `{ eventId, userId }` | Assignment does not exist |
-| 404 | `AIRPORT_NOT_FOUND` | Airport not found | `{ airportId }` | `airportId` provided in request body and airport does not exist |
-| 404 | `POSITION_NOT_FOUND` | Position not found | `{ positionId }` | `positionId` provided in request body and position does not exist |
+| 404 | `AIRPORT_NOT_FOUND` | Airport not found | `{ airport }` or `{ airportId }` | Airport identifier could not be resolved or does not exist |
+| 404 | `POSITION_NOT_FOUND` | Position not found | `{ position }` or `{ positionId }` | Position identifier could not be resolved or does not exist |
+| 403 | `INSUFFICIENT_QUALIFICATION` | Controller does not have the required qualification for this position | `{ userId, positionId, qualificationId }` | Position change requires higher qualification |
 
 #### DELETE `/api/eca/:eventId/:userId`
 
 | Status | Code | Message | Details | Condition |
 |--------|------|---------|---------|-----------|
 | 404 | `CONTROLLER_ASSIGNMENT_NOT_FOUND` | Controller Assignment not found | `{ eventId, userId }` | Assignment does not exist |
+
+---
+
+## Airports
+
+**Router:** [`src/routes/AirportRouter.ts`](../src/routes/AirportRouter.ts)  
+**Base path:** `/api/airports`
+
+| Method | Path | Handler | Success |
+|--------|------|---------|---------|
+| GET | `/api/airports/getById/:id` | getAirportById | `200` — airport object or `null` |
+| GET | `/api/airports/getByName/:name` | getAirportByName | `200` — airport object or `null` |
+| GET | `/api/airports/getAll` | getAllAirports | `200` — airport array (empty if none) |
+| GET | `/api/airports/resolve/:identifier` | resolveAirport | `200` — airport object or `null` |
+
+### Parameters
+
+#### GET `/api/airports/getById/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | Airport id |
+
+#### GET `/api/airports/getByName/:name`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `name` | string | Yes | ICAO code (e.g. `KJFK`) |
+
+#### GET `/api/airports/getAll`
+
+No parameters.
+
+#### GET `/api/airports/resolve/:identifier`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `identifier` | string | Yes | Numeric id or ICAO name; id is tried first for numeric strings |
+
+---
+
+## Positions
+
+**Router:** [`src/routes/ControllerPositionRouter.ts`](../src/routes/ControllerPositionRouter.ts)  
+**Base path:** `/api/positions`
+
+| Method | Path | Handler | Success |
+|--------|------|---------|---------|
+| GET | `/api/positions/getById/:id` | getPositionById | `200` — position object or `null` |
+| GET | `/api/positions/getByName/:name` | getPositionByName | `200` — position object or `null` |
+| GET | `/api/positions/getAll` | getAllPositions | `200` — position array (empty if none) |
+| GET | `/api/positions/resolve/:identifier` | resolvePosition | `200` — position object or `null` |
+
+### Parameters
+
+#### GET `/api/positions/getById/:id`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `id` | number | Yes | Position id |
+
+#### GET `/api/positions/getByName/:name`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `name` | string | Yes | Position name (e.g. `Tower`) |
+
+#### GET `/api/positions/getAll`
+
+No parameters.
+
+#### GET `/api/positions/resolve/:identifier`
+
+| Location | Name | Type | Required | Description |
+|----------|------|------|----------|-------------|
+| Path | `identifier` | string | Yes | Numeric id or position name; id is tried first for numeric strings |
 
 ---
 

@@ -17,6 +17,11 @@ export const getEventsHostedByUserById = async (req: Request<IdParameter>, res: 
     res.status(200).json(events);
 }
 
+export const getActiveEvents = async (_req: Request, res: Response) => {
+    const events = await eventService.getActiveEvents();
+    res.status(200).json(events);
+}
+
 export const createEvent = async (req: Request<EventCreateParameter>, res: Response) => {
     const { hostId, dateHosted } = req.params;
     const success = await eventService.createEvent(hostId, dateHosted);
@@ -33,7 +38,7 @@ export const updateEvent = async (req: Request<IdParameter, object, EventUpdateP
     const { id } = req.params;
     const eventId = id;
 
-    const { hostId, dateHosted } = req.body;
+    const { hostId, dateHosted, active } = req.body;
 
     const updateDto: IEventUpdateDto = {};
 
@@ -43,6 +48,10 @@ export const updateEvent = async (req: Request<IdParameter, object, EventUpdateP
 
     if (dateHosted !== undefined) {
         updateDto.dateHosted = dateHosted;
+    }
+
+    if (active !== undefined) {
+        updateDto.active = active;
     }
 
     const success = await eventService.updateEvent(eventId, updateDto);

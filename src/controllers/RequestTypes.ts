@@ -9,6 +9,10 @@ export type DiscordIdParameter = { discordId: string };
 
 export type UsernameParameter = { username: string };
 
+export type NameParameter = { name: string };
+
+export type IdentifierParameter = { identifier: string };
+
 export type UserDataParameter = Required<IUserUpdateDto>;
 
 export type UserUpdateParameter = Partial<IUserUpdateDto>;
@@ -19,8 +23,13 @@ export type EventCreateParameter = Required<IEventUpdateDto>;
 
 export type EventUpdateParameter = Partial<IEventUpdateDto>;
 
-export type EventControllerAttendeeUpdateParameter = Partial<Pick<IEventControllerAttendeeUpdateDto, "airportId" | "positionId">>;
+export type EventControllerAttendeeUpdateParameter = Partial<Pick<IEventControllerAttendeeUpdateDto, "airportId" | "positionId" | "airport" | "position">>;
 
-export type EventControllerAttendeeCreationParameter = Required<IEventControllerAttendeeUpdateDto>;
+export type EventControllerAttendeeCreationParameter = {
+	eventId: number;
+	userId: number;
+	airport: string;
+	position: string;
+};
 
 export type EventControllerAttendeeIdParameter = Required<Pick<IEventControllerAttendeeUpdateDto, "eventId" | "userId">>

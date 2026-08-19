@@ -62,6 +62,20 @@ export class AirportRepository implements IAirportRepository {
 		}
 	}
 
+	public async getAll(): Promise<IAirport[]> {
+		const sql = `
+			SELECT * FROM airport
+			ORDER BY name
+		`;
+
+		const [rows] = await pool.execute<RowDataPacket[]>(sql);
+
+		return rows.map(row => ({
+			id: row.id,
+			name: row.name
+		}));
+	}
+
 	public async exists(id: number): Promise<boolean> {
 		const sql = `
 			SELECT 1 FROM airport WHERE id = ?
